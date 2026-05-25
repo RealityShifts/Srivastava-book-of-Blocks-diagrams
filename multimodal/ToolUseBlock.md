@@ -6,13 +6,13 @@
 
 ```mermaid
 flowchart TD
-    n0_0["state"]:::io
+    n0_0["state  (B, D)"]:::io
     n1_0["tool selector  (softmax)"]:::op
     n2_0["Tool 1"]:::op
     n2_1["…"]:::op
     n2_2["Tool K"]:::op
     n3_0["merge tool outputs"]:::merge
-    n4_0["new state"]:::io
+    n4_0["new state  (B, D)"]:::io
     n0_0 --> n1_0
     n1_0 --> n2_0
     n1_0 --> n2_1
@@ -30,4 +30,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

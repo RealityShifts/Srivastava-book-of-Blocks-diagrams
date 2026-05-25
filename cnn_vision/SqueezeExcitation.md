@@ -6,14 +6,14 @@
 
 ```mermaid
 flowchart TD
-    n0_0["x"]:::io
+    n0_0["x  (B, C, H, W)"]:::io
     n1_0["Global AvgPool"]:::op
     n2_0["FC down  (C → C/r)"]:::op
     n3_0["ReLU"]:::act
     n4_0["FC up  (C/r → C)"]:::op
     n5_0["Sigmoid"]:::act
     n6_0["· x  (channel scale)"]:::merge
-    n7_0["y"]:::io
+    n7_0["y  (B, C, H, W)"]:::io
     n0_0 --> n1_0
     n1_0 --> n2_0
     n2_0 --> n3_0
@@ -31,4 +31,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

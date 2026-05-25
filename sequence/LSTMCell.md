@@ -6,13 +6,13 @@
 
 ```mermaid
 flowchart TD
-    n0_0["x_t"]:::io
-    n0_1["h_{t−1}"]:::io
-    n0_2["c_{t−1}"]:::io
+    n0_0["x_t  (B, D_x)"]:::io
+    n0_1["h_{t−1}  (B, D_h)"]:::io
+    n0_2["c_{t−1}  (B, D_h)"]:::io
     n1_0["linear → (i, f, g, o)"]:::op
     n2_0["c_t = f ⊙ c_{t−1} + i ⊙ g"]:::op
     n3_0["h_t = o ⊙ tanh(c_t)"]:::op
-    n4_0["h_t, c_t"]:::io
+    n4_0["h_t, c_t  (B, D_h)"]:::io
     n0_0 --> n1_0
     n0_1 --> n1_0
     n0_2 --> n1_0
@@ -28,4 +28,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

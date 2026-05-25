@@ -6,11 +6,11 @@
 
 ```mermaid
 flowchart TD
-    n0_0["state"]:::io
+    n0_0["state  (B, D_s)"]:::io
     n1_0["shared MLP trunk"]:::op
     n2_0["policy head"]:::op
     n2_1["value head"]:::op
-    n3_0["π, V"]:::io
+    n3_0["π, V  (B, D_a), (B,)"]:::io
     n0_0 --> n1_0
     n1_0 --> n2_0
     n1_0 --> n2_1
@@ -25,4 +25,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

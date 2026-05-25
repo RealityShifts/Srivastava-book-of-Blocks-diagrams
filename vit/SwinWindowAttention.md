@@ -10,7 +10,7 @@ flowchart TD
     n1_0["window partition  (w × w)"]:::op
     n2_0["MHA + relative position bias"]:::attn
     n3_0["window reverse"]:::op
-    n4_0["y"]:::io
+    n4_0["y  (B, H, W, C)"]:::io
     n0_0 --> n1_0
     n1_0 --> n2_0
     n2_0 --> n3_0
@@ -24,4 +24,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

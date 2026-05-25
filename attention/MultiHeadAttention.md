@@ -2,13 +2,13 @@
 
 > Standard scaled dot-product attention with H heads and an output projection.
 
-**Shapes:** `Q,K,V → (B, T, D)`
+**Shapes:** `Q,K,V:(B, T, D) → (B, T, D)`
 
 ```mermaid
 flowchart TD
-    n0_0["Q"]:::io
-    n0_1["K"]:::io
-    n0_2["V"]:::io
+    n0_0["Q  (B, T, D)"]:::io
+    n0_1["K  (B, T, D)"]:::io
+    n0_2["V  (B, T, D)"]:::io
     n1_0["linear Q"]:::op
     n1_1["linear K"]:::op
     n1_2["linear V"]:::op
@@ -40,4 +40,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

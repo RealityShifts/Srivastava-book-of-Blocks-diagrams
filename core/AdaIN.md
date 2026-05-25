@@ -6,12 +6,12 @@
 
 ```mermaid
 flowchart TD
-    n0_0["x  content"]:::io
-    n0_1["s  style"]:::io
+    n0_0["x  content  (B, C, H, W)"]:::io
+    n0_1["s  style  (B, C)"]:::io
     n1_0["μ_x, σ_x  per channel"]:::op
     n1_1["γ, β = MLP(s)"]:::op
     n2_0["(x − μ_x) / σ_x  · γ + β"]:::op
-    n3_0["y"]:::io
+    n3_0["y  (B, C, H, W)"]:::io
     n0_0 --> n1_0
     n0_1 --> n1_1
     n1_0 --> n2_0
@@ -26,4 +26,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```

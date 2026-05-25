@@ -6,7 +6,7 @@
 
 ```mermaid
 flowchart TD
-    n0_0["x"]:::io
+    n0_0["x  (B, C, H, W)"]:::io
     n1_0["1×1 Conv"]:::op
     n1_1["3×3 dil=6"]:::op
     n1_2["3×3 dil=12"]:::op
@@ -14,7 +14,7 @@ flowchart TD
     n1_4["Image pool"]:::op
     n2_0["concat"]:::merge
     n3_0["1×1 Conv"]:::op
-    n4_0["y"]:::io
+    n4_0["y  (B, C', H, W)"]:::io
     n0_0 --> n1_0
     n0_0 --> n1_1
     n0_0 --> n1_2
@@ -36,4 +36,5 @@ flowchart TD
     classDef emb fill:#fef9c3,stroke:#a16207,stroke-width:1.4px,color:#713f12
     classDef loss fill:#fee2e2,stroke:#b91c1c,stroke-width:1.4px,color:#7f1d1d
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
+    classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
