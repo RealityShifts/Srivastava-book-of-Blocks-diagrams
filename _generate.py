@@ -4,6 +4,16 @@ Run ``python _generate.py`` to (re)build everything. Use
 ``python _generate.py --depth N`` to recursively expand ``_ref`` nodes up
 to ``N`` levels deep (default: 1).
 
+The 122 blocks shipped here act as a *built-in library*: you can author
+your own architecture spec file and ``_ref()`` any built-in block by
+name. Run::
+
+    python _generate.py --specs my_arch.py --out ./diagrams
+
+to generate diagrams for your blocks; pass ``--specs`` multiple times to
+merge several files. Add ``--no-builtins`` to skip regenerating the 122
+library files (they remain available as resolvable references).
+
 Each block produces a self-contained Markdown file under
 ``<category>/<BlockName>.md`` containing one
 Mermaid ``flowchart TD`` diagram. Markdown files render natively on GitHub
@@ -31,11 +41,28 @@ A node of kind ``ref`` whose label exactly matches a registered block name
 is expanded inline as a Mermaid ``subgraph`` (up to ``--depth`` levels).
 Beyond the depth limit, or for an unresolved name, the ref renders as a
 single styled box. Cycles are detected and broken automatically.
+
+User spec files
+---------------
+A user spec file is a regular Python file that exposes one of:
+
+* ``CATEGORIES = {cat_name: (cat_desc, {block_name: spec, ...}), ...}``
+  -- same shape as the built-in registry, for multi-category libraries.
+* ``BLOCKS = {block_name: spec, ...}`` -- single category. Optionally set
+  module-level ``CATEGORY = "..."`` and ``CATEGORY_DESC = "..."``;
+  otherwise the file's stem is used as the category name.
+
+Inside the file, write ``from _generate import _io, _op, _ref, ...`` to
+get the DSL helpers; this script automatically prepends its own directory
+to ``sys.path`` before loading user files.
 """
 
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import os
+import sys
 from pathlib import Path
 from typing import Dict, FrozenSet, List, Optional, Sequence, Tuple
 
@@ -1673,65 +1700,229 @@ Specs may use `_ref("BlockName")` to point at another registered block.
 Run `python _generate.py --depth N` to inline references up to `N` levels
 deep as nested Mermaid `subgraph` blocks (default: 1). At depth 0 each
 ref renders as a single `ref`-styled box; cycles are detected and broken.
+
+## Custom architectures (`--specs`)
+
+The 122 built-in blocks act as a reusable library. To diagram your own
+architecture, write a Python file that exposes either `BLOCKS` (single
+category) or `CATEGORIES` (multi-category), reusing the DSL helpers and
+referencing built-ins by name:
+
+```python
+# my_arch.py
+from _generate import _io, _op, _ref
+
+CATEGORY = "myarch"
+CATEGORY_DESC = "A 12-layer transformer wired from built-in blocks."
+
+BLOCKS = {
+    "MyTransformer": (
+        "Stacked TransformerEncoderBlocks fed by a token embedding.",
+        "(B, T) → (B, T, D)",
+        [
+            [_io("ids  (B, T)")],
+            [_ref("TokenEmbedding")],
+            [_ref("TransformerEncoderBlock")],
+            [_ref("TransformerEncoderBlock")],
+            [_io("y  (B, T, D)")],
+        ],
+    ),
+}
+```
+
+Then generate:
+
+```bash
+python _generate.py --specs my_arch.py --out ./diagrams --depth 1
+# only your blocks, library kept as registered references:
+python _generate.py --specs my_arch.py --out ./diagrams --no-builtins
+```
+
+Pass `--specs` multiple times to merge several files. User block names
+shadow built-ins of the same name.
 """
 
 
-def build_registry() -> Dict[str, Spec]:
-    """Flatten every category dict into one ``name -> spec`` map.
+CategoriesMap = Dict[str, Tuple[str, Dict[str, Spec]]]
 
-    A name collision across categories is a programmer error and worth surfacing.
+
+def build_registry(*category_maps: CategoriesMap) -> Dict[str, Spec]:
+    """Flatten one or more category dicts into a single ``name -> spec`` map.
+
+    Built-in categories are passed first; later maps (e.g. user-supplied)
+    override earlier ones, so users can shadow a built-in block by reusing
+    its name. Duplicate names *within* a single map raise — that's a bug.
     """
     reg: Dict[str, Spec] = {}
-    for _cat, (_desc, blocks) in CATEGORIES.items():
-        for name, spec in blocks.items():
-            if name in reg:
-                raise ValueError(f"duplicate block name across categories: {name!r}")
-            reg[name] = spec
+    for i, cats in enumerate(category_maps):
+        seen_in_map: set = set()
+        for _cat, (_desc, blocks) in cats.items():
+            for name, spec in blocks.items():
+                if name in seen_in_map:
+                    raise ValueError(
+                        f"duplicate block name within map #{i}: {name!r}"
+                    )
+                seen_in_map.add(name)
+                reg[name] = spec
     return reg
 
 
-def write_index(root: Path) -> None:
+def load_user_specs(path: Path) -> CategoriesMap:
+    """Import a user spec file and normalise its exports to ``CategoriesMap``.
+
+    Accepts either ``CATEGORIES`` (preferred, multi-category) or ``BLOCKS``
+    (single category, with optional ``CATEGORY`` / ``CATEGORY_DESC``).
+    """
+    here = str(Path(__file__).parent.resolve())
+    if here not in sys.path:
+        # so user files can `from _generate import _io, _op, _ref, ...`
+        sys.path.insert(0, here)
+
+    spec = importlib.util.spec_from_file_location(f"_user_{path.stem}", path)
+    if spec is None or spec.loader is None:
+        raise ValueError(f"cannot import {path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    if hasattr(mod, "CATEGORIES"):
+        return dict(mod.CATEGORIES)
+    if hasattr(mod, "BLOCKS"):
+        cat = getattr(mod, "CATEGORY", path.stem)
+        desc = getattr(
+            mod, "CATEGORY_DESC", f"User-supplied blocks from {path.name}.",
+        )
+        return {cat: (desc, dict(mod.BLOCKS))}
+    raise ValueError(
+        f"{path}: must define BLOCKS (dict) or CATEGORIES (dict) at module level"
+    )
+
+
+def _safe_rel(target: Path, root: Path) -> Optional[str]:
+    """Return a relative link from ``root`` to ``target`` only if ``target``
+    lives inside ``root``. Avoids leaking absolute filesystem paths into
+    INDEX/markdown when the user's output dir is separate from the built-in
+    library tree.
+    """
+    try:
+        target.resolve().relative_to(root.resolve())
+    except ValueError:
+        return None
+    return os.path.relpath(target, root)
+
+
+def write_index(out_root: Path, categories: CategoriesMap, paths: Dict[str, Path]) -> None:
+    """Write INDEX.md at ``out_root`` listing every block.
+
+    Block entries get a clickable link only when the file lives within
+    ``out_root``; cross-tree references render as plain text so the index
+    stays portable.
+    """
     lines = ["# Index", ""]
-    for cat, (desc, blocks) in CATEGORIES.items():
+    for cat, (desc, blocks) in categories.items():
         lines.append(f"## {cat}")
         lines.append("")
         lines.append(desc)
         lines.append("")
         for name in blocks:
-            lines.append(f"* [{name}](./{cat}/{name}.md)")
+            target = paths.get(name)
+            rel = _safe_rel(target, out_root) if target is not None else None
+            lines.append(f"* [{name}]({rel})" if rel else f"* {name}")
         lines.append("")
-    (root / "INDEX.md").write_text("\n".join(lines))
+    (out_root / "INDEX.md").write_text("\n".join(lines))
+
+
+def _spec_unpack(spec: Spec) -> Tuple[str, str, List[Row], Sequence[Skip]]:
+    if len(spec) == 3:
+        desc, shapes, rows = spec
+        return desc, shapes, rows, ()
+    desc, shapes, rows, skips = spec
+    return desc, shapes, rows, skips
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=(
+            "Generate Mermaid architecture diagrams. Without --specs the 122 "
+            "built-in blocks are regenerated; with --specs the named files are "
+            "loaded, merged into the registry, and rendered to --out."
+        ),
+    )
     parser.add_argument(
         "--depth", type=int, default=1,
         help="Max recursion depth for _ref nodes (0 = render refs as leaves).",
     )
+    parser.add_argument(
+        "--specs", type=Path, action="append", default=[],
+        metavar="PATH",
+        help="Path to a user spec file (Python). May be passed multiple times.",
+    )
+    parser.add_argument(
+        "--out", type=Path, default=None, metavar="DIR",
+        help="Output directory (default: directory of this script).",
+    )
+    parser.add_argument(
+        "--no-builtins", action="store_true",
+        help="Don't regenerate built-in block .md files; keep them as registered "
+             "references only.",
+    )
     args = parser.parse_args()
 
-    root = Path(__file__).parent
-    registry = build_registry()
-    for cat, (_, blocks) in CATEGORIES.items():
-        out_dir = root / cat
-        out_dir.mkdir(exist_ok=True)
-        # wipe any previously-generated files (don't touch _generate.py / readme)
+    builtin_root = Path(__file__).parent.resolve()
+    out_root = (args.out.resolve() if args.out else builtin_root)
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    user_cats: CategoriesMap = {}
+    for path in args.specs:
+        user_cats.update(load_user_specs(path.resolve()))
+
+    # User maps override built-ins; built-ins are checked for internal duplicates.
+    registry = build_registry(CATEGORIES, user_cats) if user_cats else build_registry(CATEGORIES)
+    all_cats: CategoriesMap = {**CATEGORIES, **user_cats}
+
+    # Decide what gets rendered to disk.
+    to_generate: CategoriesMap = (
+        dict(user_cats) if args.no_builtins else dict(all_cats)
+    )
+
+    # Map every known block name to the .md file users will navigate to.
+    # Generated files live under out_root; if --no-builtins, we point at the
+    # original built-in tree so cross-references still resolve to a real file.
+    name_to_path: Dict[str, Path] = {}
+    for cat, (_, blocks) in to_generate.items():
+        for name in blocks:
+            name_to_path[name] = (out_root / cat / f"{name}.md").resolve()
+    if args.no_builtins:
+        for cat, (_, blocks) in CATEGORIES.items():
+            for name in blocks:
+                name_to_path.setdefault(
+                    name, (builtin_root / cat / f"{name}.md").resolve(),
+                )
+
+    total = 0
+    for cat, (_, blocks) in to_generate.items():
+        out_dir = out_root / cat
+        out_dir.mkdir(parents=True, exist_ok=True)
+        # only wipe .md inside categories we are actually regenerating
         for old in out_dir.glob("*.md"):
             old.unlink()
         for name, spec in blocks.items():
-            if len(spec) == 3:
-                desc, shapes, rows = spec
-                skips: Sequence[Skip] = ()
-            else:
-                desc, shapes, rows, skips = spec
+            desc, shapes, rows, skips = _spec_unpack(spec)
             body = render_diagram(rows, skips, registry=registry, max_depth=args.depth)
             md = render_markdown(name, desc, shapes, body)
-            (out_dir / f"{name}.md").write_text(md)
-    (root / "README.md").write_text(README_BODY)
-    write_index(root)
-    total = sum(len(b) for _, b in CATEGORIES.values())
-    print(f"wrote {total} diagrams across {len(CATEGORIES)} categories")
+            name_to_path[name].write_text(md)
+            total += 1
+
+    # README only belongs to the built-in repo; don't clobber arbitrary --out trees.
+    if not args.specs and out_root == builtin_root:
+        (builtin_root / "README.md").write_text(README_BODY)
+
+    write_index(out_root, all_cats, name_to_path)
+
+    user_count = sum(len(b) for _, b in user_cats.values())
+    print(
+        f"wrote {total} diagrams across {len(to_generate)} categories "
+        f"({user_count} user, {total - user_count} built-in) → {out_root}"
+    )
 
 
 if __name__ == "__main__":

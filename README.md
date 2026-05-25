@@ -50,3 +50,43 @@ Specs may use `_ref("BlockName")` to point at another registered block.
 Run `python _generate.py --depth N` to inline references up to `N` levels
 deep as nested Mermaid `subgraph` blocks (default: 1). At depth 0 each
 ref renders as a single `ref`-styled box; cycles are detected and broken.
+
+## Custom architectures (`--specs`)
+
+The 122 built-in blocks act as a reusable library. To diagram your own
+architecture, write a Python file that exposes either `BLOCKS` (single
+category) or `CATEGORIES` (multi-category), reusing the DSL helpers and
+referencing built-ins by name:
+
+```python
+# my_arch.py
+from _generate import _io, _op, _ref
+
+CATEGORY = "myarch"
+CATEGORY_DESC = "A 12-layer transformer wired from built-in blocks."
+
+BLOCKS = {
+    "MyTransformer": (
+        "Stacked TransformerEncoderBlocks fed by a token embedding.",
+        "(B, T) → (B, T, D)",
+        [
+            [_io("ids  (B, T)")],
+            [_ref("TokenEmbedding")],
+            [_ref("TransformerEncoderBlock")],
+            [_ref("TransformerEncoderBlock")],
+            [_io("y  (B, T, D)")],
+        ],
+    ),
+}
+```
+
+Then generate:
+
+```bash
+python _generate.py --specs my_arch.py --out ./diagrams --depth 1
+# only your blocks, library kept as registered references:
+python _generate.py --specs my_arch.py --out ./diagrams --no-builtins
+```
+
+Pass `--specs` multiple times to merge several files. User block names
+shadow built-ins of the same name.
