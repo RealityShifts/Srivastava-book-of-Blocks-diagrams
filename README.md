@@ -16,13 +16,30 @@ A React Flow-based web editor lives in [`editor/`](./editor) — drag from
 a palette of the 10 primitive kinds + all 122 built-in blocks, wire them
 together, get live shape-checking (mismatched edges turn red), then export
 to **Mermaid**, **DSL `.py`** (round-trips through `python _generate.py
---specs ...`), or **Graph JSON**.
+--specs ...`), or **Graph JSON**. Use *Import Mermaid* to pull any `.md`
+from [`diagrams/`](./diagrams) straight back onto the canvas.
 
 ```bash
 cd editor
 npm install
 npm run extract-library   # snapshot blocks/ -> public/library.json
 npm run dev               # http://localhost:5173
+```
+
+## Reverser: Mermaid → DSL `.py`
+
+[`_reverse.py`](./_reverse.py) inverts the renderer. Point it at any
+generated `.md` (or several) and it emits a drop-in spec that
+`_generate.py --specs ...` re-renders byte-for-byte identically (122/122
+built-ins round-trip exactly). Subgraphs collapse back to a single
+`_ref("Name")`; skip arrows survive as positional skips; per-port shape
+metadata is the only thing lost (it never reaches Mermaid in the first
+place).
+
+```bash
+python _reverse.py diagrams/core/ResidualBlock.md            # writes ResidualBlock_spec.py next to it
+python _reverse.py diagrams/attention/*.md -o attn_spec.py    # bundle a whole category
+python _reverse.py diagrams/core/Linear.md -o -               # stdout
 ```
 
 ## Where these render

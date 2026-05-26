@@ -3,6 +3,7 @@ import { useStore } from "../store";
 import { toMermaid } from "../generators/mermaid";
 import { toDSL } from "../generators/dsl";
 import { fromJSON, toJSON } from "../generators/json";
+import { fromMermaid } from "../generators/reverseMermaid";
 
 const download = (filename: string, contents: string, mime = "text/plain") => {
   const blob = new Blob([contents], { type: mime });
@@ -38,15 +39,26 @@ const Btn = ({
 export default function Toolbar() {
   const { meta, nodes, edges, loadGraph, clearGraph } = useStore();
   const fileRef = useRef<HTMLInputElement>(null);
+  const mdRef = useRef<HTMLInputElement>(null);
 
   const stem = meta.name.replace(/[^A-Za-z0-9_-]/g, "_") || "Block";
 
-  const onImport = (file: File) => {
+  const onImportJSON = (file: File) => {
     file.text().then((txt) => {
       try {
         loadGraph(fromJSON(txt));
       } catch (e) {
         alert(`Import failed: ${e}`);
+      }
+    });
+  };
+
+  const onImportMermaid = (file: File) => {
+    file.text().then((txt) => {
+      try {
+        loadGraph(fromMermaid(txt));
+      } catch (e) {
+        alert(`Mermaid import failed: ${e}`);
       }
     });
   };
@@ -74,7 +86,25 @@ export default function Toolbar() {
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) onImport(f);
+            if (f) onImportJSON(f);
+            e.target.value = "";
+          }}
+        />
+        <Btn
+          kind="ghost"
+          onClick={() => mdRef.current?.click()}
+          title="Reverse a Mermaid .md (any from ../diagrams) back onto the canvas. Subgraphs collapse to _ref nodes."
+        >
+          Import Mermaid
+        </Btn>
+        <input
+          ref={mdRef}
+          type="file"
+          accept=".md,text/markdown,text/plain"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onImportMermaid(f);
             e.target.value = "";
           }}
         />

@@ -39,7 +39,8 @@ npm run build        # production bundle in dist/
   and they disagree (whitespace-normalised), the edge turns **red** with a
   `(out) ≠ (in)` label. Exactly mirrors the renderer in
   [`../_generate.py`](../_generate.py).
-- **Toolbar** — Import JSON / Export JSON / Export Mermaid / Export DSL .py / Clear.
+- **Toolbar** — Import JSON / **Import Mermaid** / Export JSON / Export Mermaid / Export DSL .py / Clear.
+  *Import Mermaid* parses any `.md` produced by `../_generate.py` (or by *Export Mermaid* itself) and drops it back onto the canvas. Subgraphs collapse to a single `_ref` node; per-port shapes don't survive the round-trip since they aren't encoded in Mermaid.
 
 ## Authoring loop
 
@@ -96,6 +97,7 @@ editor/
     │   └── ShapeEdge.tsx         # custom edge with live shape-check colouring
     ├── generators/
     │   ├── mermaid.ts            # → flowchart TD (same output as _generate.py)
+    │   ├── reverseMermaid.ts     # ← flowchart TD (mirrors ../_reverse.py)
     │   ├── dsl.ts                # → user spec.py with explicit edges
     │   ├── json.ts               # → / ← GraphJSON
     │   └── topo.ts               # longest-path layering used by dsl.ts
