@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+
+/* ---------------------------------------------------------------------------
+ * Node-kind palette, mirroring STYLE in ../../_generate.py so the editor and
+ * the rendered Mermaid diagrams stay visually consistent.
+ * ------------------------------------------------------------------------- */
+:root {
+  --io-fill: #f1f5f9;   --io-stroke: #334155;   --io-text: #0f172a;
+  --op-fill: #dbeafe;   --op-stroke: #1d4ed8;   --op-text: #1e3a8a;
+  --norm-fill: #dcfce7; --norm-stroke: #15803d; --norm-text: #14532d;
+  --act-fill: #ffedd5;  --act-stroke: #c2410c;  --act-text: #7c2d12;
+  --attn-fill: #ede9fe; --attn-stroke: #6d28d9; --attn-text: #4c1d95;
+  --merge-fill: #fef3c7;--merge-stroke: #b45309;--merge-text: #78350f;
+  --emb-fill: #fef9c3;  --emb-stroke: #a16207;  --emb-text: #713f12;
+  --loss-fill: #fee2e2; --loss-stroke: #b91c1c; --loss-text: #7f1d1d;
+  --ctrl-fill: #f5f5f4; --ctrl-stroke: #52525b; --ctrl-text: #27272a;
+  --ref-fill: #e0f2fe;  --ref-stroke: #0369a1;  --ref-text: #0c4a6e;
+  --mismatch: #dc2626;
+}
+
+html, body, #root { height: 100%; margin: 0; }
+body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+/* React Flow node shell, kind-aware via data-kind attribute. */
+.node-shell {
+  @apply rounded-md border-[1.4px] px-3 py-2 text-sm font-medium shadow-sm;
+  min-width: 140px;
+  background: var(--fill);
+  border-color: var(--stroke);
+  color: var(--text);
+}
+.node-shell[data-kind="io"]    { --fill: var(--io-fill);    --stroke: var(--io-stroke);    --text: var(--io-text); }
+.node-shell[data-kind="op"]    { --fill: var(--op-fill);    --stroke: var(--op-stroke);    --text: var(--op-text); }
+.node-shell[data-kind="norm"]  { --fill: var(--norm-fill);  --stroke: var(--norm-stroke);  --text: var(--norm-text); }
+.node-shell[data-kind="act"]   { --fill: var(--act-fill);   --stroke: var(--act-stroke);   --text: var(--act-text); }
+.node-shell[data-kind="attn"]  { --fill: var(--attn-fill);  --stroke: var(--attn-stroke);  --text: var(--attn-text); }
+.node-shell[data-kind="merge"] { --fill: var(--merge-fill); --stroke: var(--merge-stroke); --text: var(--merge-text); }
+.node-shell[data-kind="emb"]   { --fill: var(--emb-fill);   --stroke: var(--emb-stroke);   --text: var(--emb-text); }
+.node-shell[data-kind="loss"]  { --fill: var(--loss-fill);  --stroke: var(--loss-stroke);  --text: var(--loss-text); }
+.node-shell[data-kind="ctrl"]  { --fill: var(--ctrl-fill);  --stroke: var(--ctrl-stroke);  --text: var(--ctrl-text); }
+.node-shell[data-kind="ref"]   {
+  --fill: var(--ref-fill); --stroke: var(--ref-stroke); --text: var(--ref-text);
+  border-style: dashed;
+  border-width: 2px;
+}
+
+.node-shape {
+  @apply mt-1 inline-block rounded-sm bg-white/60 px-1.5 py-0.5 text-[10px] font-mono leading-none text-slate-700;
+}
+
+.shape-mismatch path {
+  stroke: var(--mismatch) !important;
+  stroke-width: 2.2px !important;
+}
+.shape-mismatch text { fill: var(--mismatch) !important; font-weight: 600; }
+
+/* Palette pills for the left panel */
+.palette-pill {
+  @apply cursor-grab rounded-md border-[1.4px] px-2 py-1 text-xs font-medium select-none;
+  background: var(--fill);
+  border-color: var(--stroke);
+  color: var(--text);
+}

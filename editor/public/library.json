@@ -1,0 +1,4984 @@
+{
+  "categories": {
+    "core": {
+      "desc": "Core neural-network primitives.",
+      "blocks": {
+        "Linear": {
+          "desc": "Affine projection y = x · Wᵀ + b.",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "matmul  x · Wᵀ"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "+ bias"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ConvBlock": {
+          "desc": "Conv → Norm → Activation, the canonical CNN unit.",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 2D"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "BatchNorm / GroupNorm / LayerNorm"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "ReLU / GELU / SiLU / Mish"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DepthwiseSeparableConv2d": {
+          "desc": "Depthwise spatial conv followed by 1×1 pointwise conv (MobileNet).",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Depthwise Conv K×K  (groups=C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Pointwise Conv 1×1  (C → C')"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DilatedConv2d": {
+          "desc": "Standard conv with dilation > 1 (atrous), enlarges receptive field for free.",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv K×K  (dilation = d)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "GroupConv2d": {
+          "desc": "Conv2d with channel groups (ResNeXt cardinality).",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv K×K  (groups = g)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "Conv1d": {
+          "desc": "1-D convolution wrapper.",
+          "shapes": "(B, C, T) → (B, C', T)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, T)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 1D K  (stride, padding)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', T)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "Conv3d": {
+          "desc": "3-D convolution wrapper.",
+          "shapes": "(B, C, T, H, W) → (B, C', T, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, T, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3D K  (stride, padding)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', T, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "Mish": {
+          "desc": "Self-gated activation: x · tanh(softplus(x)).",
+          "shapes": "(*) → (*)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (*)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "softplus(x)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "tanh(·)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "× x"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (*)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              3,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "RMSNorm": {
+          "desc": "Root-mean-square normalisation, scale-only (no mean subtraction).",
+          "shapes": "(*, D) → (*, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (*, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "RMS = √mean(x²)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "x / (RMS + ε)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "× learned g"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (*, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "AdaIN": {
+          "desc": "Adaptive Instance Normalisation: replace x's per-channel stats with style stats.",
+          "shapes": "x:(B, C, H, W), s:(B, C) → y:(B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  content  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "s  style  (B, C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "μ_x, σ_x  per channel"
+              },
+              {
+                "kind": "op",
+                "label": "γ, β = MLP(s)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "(x − μ_x) / σ_x  · γ + β"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SPADE": {
+          "desc": "Spatially-adaptive denormalisation: γ, β come from a segmentation map.",
+          "shapes": "x:(B, C, H, W), seg:(B, K, H, W) → y:(B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "seg map  (B, K, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "BatchNorm(x)"
+              },
+              {
+                "kind": "op",
+                "label": "Conv → γ(spatial), β(spatial)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "γ · x_norm + β"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ResidualBlock": {
+          "desc": "Two conv-norm-act stack with identity skip and post-add activation.",
+          "shapes": "(B, C, H, W) → (B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "Norm"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "ReLU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "Norm"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "ReLU"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              6,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "SkipConnection": {
+          "desc": "Generic identity skip around any sub-module f.",
+          "shapes": "(*) → (*)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (*)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "f(x)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (*)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              2,
+              0
+            ]
+          ],
+          "edges": null
+        }
+      }
+    },
+    "attention": {
+      "desc": "Attention mechanisms.",
+      "blocks": {
+        "MultiHeadAttention": {
+          "desc": "Standard scaled dot-product attention with H heads and an output projection.",
+          "shapes": "Q,K,V:(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "Q  (B, T, D)"
+              },
+              {
+                "kind": "io",
+                "label": "K  (B, T, D)"
+              },
+              {
+                "kind": "io",
+                "label": "V  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear Q"
+              },
+              {
+                "kind": "op",
+                "label": "linear K"
+              },
+              {
+                "kind": "op",
+                "label": "linear V"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "split into H heads"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Q · Kᵀ / √d_h"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "softmax (+ optional mask)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "· V"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "concat heads"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "output linear"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SelfAttention": {
+          "desc": "MultiHeadAttention applied with Q = K = V = x.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "derive Q, K, V from x"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "MultiHeadAttention"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "CausalSelfAttention": {
+          "desc": "SelfAttention with an upper-triangular mask preventing future leakage.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Q, K, V from x"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "MultiHeadAttention + causal mask"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "CrossAttention": {
+          "desc": "Q comes from x, K and V come from a separate context tensor.",
+          "shapes": "x:(B, T_q, D), ctx:(B, T_k, D) → (B, T_q, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T_q, D)"
+              },
+              {
+                "kind": "io",
+                "label": "context  (B, T_k, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Q from x"
+              },
+              {
+                "kind": "op",
+                "label": "K, V from context"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "MultiHeadAttention"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T_q, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "WindowAttention": {
+          "desc": "Self-attention restricted to non-overlapping w×w windows (Swin).",
+          "shapes": "(B, H, W, C) → (B, H, W, C)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, H, W, C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "window partition  (w × w)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "MHA + relative pos bias"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "window reverse"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, H, W, C)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "LinearAttention": {
+          "desc": "Kernelised attention with O(N) cost via Q · (Kᵀ V).",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "Q, K, V  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "φ(Q),  φ(K)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Kᵀ · V"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Q · (Kᵀ V)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "normalise by Q · Σ K"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "FlashAttention": {
+          "desc": "Mathematically identical to MHA, but uses tiled IO-aware kernels.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "Q, K, V  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "flash kernel  (tiled softmax, no materialised attn matrix)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "RotaryEmbedding": {
+          "desc": "Inject absolute position into Q, K via per-pair rotations.",
+          "shapes": "Q,K:(B, H, T, d) → rotated Q,K",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "Q, K  (B, H, T, d)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "freqs θ_pos = 10000^(−2i/d)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "rotate (even, odd) dim pairs"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "Q', K'  (B, H, T, d)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "RelativePositionBias": {
+          "desc": "Learnable bias added to attention logits as a function of (i − j).",
+          "shapes": "logits:(*, T, T) → biased logits",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "position pairs (i, j)  (T, T)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "bias table lookup B[i − j]"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+ to attn logits"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "biased logits  (*, T, T)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "AttentionPooling": {
+          "desc": "A learnable query attends over a sequence to produce a single pooled vector.",
+          "shapes": "(B, T, D) → (B, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "learnable query  (1, D)"
+              },
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "MHA(query, x, x)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "pooled  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "transformer": {
+      "desc": "Transformer encoder / decoder, FFN variants, MoE.",
+      "blocks": {
+        "FeedForward": {
+          "desc": "Two-layer MLP with an inner hidden dim r × D.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear up  (D → r·D)"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "GELU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear down  (r·D → D)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SwiGLU": {
+          "desc": "Gated FFN where the gate path uses SiLU (LLaMA-style).",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear → (a, b)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "silu(a) ⊙ b"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear out"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "GEGLU": {
+          "desc": "Same gated FFN as SwiGLU but with GELU on the gate.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear → (a, b)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "gelu(a) ⊙ b"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear out"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "TransformerEncoderBlock": {
+          "desc": "Pre-norm transformer block: LN → MHA → +; LN → FFN → +.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "LayerNorm"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "MultiHeadAttention"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "LayerNorm"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "FeedForward"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              3,
+              0
+            ],
+            [
+              3,
+              0,
+              6,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "TransformerDecoderBlock": {
+          "desc": "Pre-norm decoder: causal self-attn, cross-attn over context, FFN.",
+          "shapes": "x:(B, T, D), ctx:(B, M, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "LayerNorm"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "CausalSelfAttention"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "LayerNorm"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "CrossAttention"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "LayerNorm"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "FeedForward"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              3,
+              0
+            ],
+            [
+              3,
+              0,
+              6,
+              0
+            ],
+            [
+              6,
+              0,
+              9,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "MixtureOfExperts": {
+          "desc": "Top-k gated mixture: router scores experts, top-k run, weighted sum.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "router (linear → softmax → top-k)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Expert 1"
+              },
+              {
+                "kind": "op",
+                "label": "Expert 2"
+              },
+              {
+                "kind": "op",
+                "label": "…"
+              },
+              {
+                "kind": "op",
+                "label": "Expert E"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "weighted sum (gates · experts)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SwitchMoE": {
+          "desc": "MoE specialisation with k = 1: a single expert per token.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "router (top-1)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Expert 1"
+              },
+              {
+                "kind": "op",
+                "label": "…"
+              },
+              {
+                "kind": "op",
+                "label": "Expert E"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "selected expert (one per token)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "cnn_vision": {
+      "desc": "CNN and vision-specific blocks.",
+      "blocks": {
+        "InceptionBlock": {
+          "desc": "Parallel multi-scale convs concatenated channel-wise (GoogLeNet).",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "1×1 Conv"
+              },
+              {
+                "kind": "op",
+                "label": "1×1 → 3×3"
+              },
+              {
+                "kind": "op",
+                "label": "1×1 → 5×5"
+              },
+              {
+                "kind": "op",
+                "label": "3×3 MaxPool → 1×1"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "concat (channel)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DenseBlock": {
+          "desc": "Each layer's input is the concatenation of all earlier layers' outputs (DenseNet).",
+          "shapes": "(B, C, H, W) → (B, C + k·L, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "BN-ReLU-Conv  (layer 1)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "concat with x"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "BN-ReLU-Conv  (layer 2)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "concat with all prev"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "…  (L layers)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C + k·L, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SqueezeExcitation": {
+          "desc": "Channel-wise gating via global pool → bottleneck MLP → sigmoid.",
+          "shapes": "(B, C, H, W) → (B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Global AvgPool"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "FC down  (C → C/r)"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "ReLU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "FC up  (C/r → C)"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "Sigmoid"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "· x  (channel scale)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              6,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "CBAM": {
+          "desc": "Sequential channel attention then spatial attention.",
+          "shapes": "(B, C, H, W) → (B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Channel Attention  (MLP on max+avg pool)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "· x"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Spatial Attention  (Conv on max+avg over C)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "· x"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              2,
+              0
+            ],
+            [
+              2,
+              0,
+              4,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "SpatialPyramidPooling": {
+          "desc": "Multi-scale fixed-output pooling, concatenated.",
+          "shapes": "(B, C, H, W) → (B, C·Σbins²,)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "AvgPool 1×1"
+              },
+              {
+                "kind": "op",
+                "label": "AvgPool 2×2"
+              },
+              {
+                "kind": "op",
+                "label": "AvgPool 4×4"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "flatten + concat"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C·Σbins²,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "FeaturePyramidNetwork": {
+          "desc": "Build multi-scale feature maps via top-down upsampling + lateral 1×1 connections.",
+          "shapes": "(C3, C4, C5) → (P3, P4, P5)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "C3, C4, C5  (B, Cᵢ, H/2ⁱ, W/2ⁱ)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "1×1 lateral on each level"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "top-down: upsample + add"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "3×3 smooth"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "P3, P4, P5  (B, C, H/2ⁱ, W/2ⁱ)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ASPP": {
+          "desc": "Atrous Spatial Pyramid Pooling: parallel atrous convs + image pool, concatenated.",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "1×1 Conv"
+              },
+              {
+                "kind": "op",
+                "label": "3×3 dil=6"
+              },
+              {
+                "kind": "op",
+                "label": "3×3 dil=12"
+              },
+              {
+                "kind": "op",
+                "label": "3×3 dil=18"
+              },
+              {
+                "kind": "op",
+                "label": "Image pool"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "concat"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "1×1 Conv"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "PixelShuffleUpsample": {
+          "desc": "Sub-pixel upsampling: rearrange r² channels into r×r spatial blocks.",
+          "shapes": "(B, C, H, W) → (B, C, r·H, r·W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv → C·r² channels"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "PixelShuffle r"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, r·H, r·W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DeformableConv2d": {
+          "desc": "Conv whose sample locations are shifted by a learned offset field.",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "offset Conv → Δp"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "bilinear sample at p + Δp"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv on sampled features"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DeformableAttention": {
+          "desc": "Attention that samples a small set of keys at learned offsets per query (Deformable DETR).",
+          "shapes": "(B, N, C) → (B, N, C)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, N, C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "MLP → reference + sampling offsets"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "bilinear sample features"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "attention weights (per head, per point)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "weighted sum + output proj"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, N, C)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "unet_diffusion": {
+      "desc": "UNet, time conditioning, ControlNet, LoRA, hypernets.",
+      "blocks": {
+        "SinusoidalTimeEmbedding": {
+          "desc": "Sin/cos positional embedding of the diffusion timestep t.",
+          "shapes": "t:(B,) → emb:(B, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "t  (B,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "freqs = 10000^(−2i/D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "[sin(t·f),  cos(t·f)]"
+              }
+            ],
+            [
+              {
+                "kind": "emb",
+                "label": "emb  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "TimestepMLP": {
+          "desc": "Two-layer MLP applied to the time embedding before injection.",
+          "shapes": "(B, D) → (B, D')",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "t_emb  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "SiLU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, D')"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DownsampleBlock": {
+          "desc": "Spatial downsample by 2× via a strided 3×3 conv.",
+          "shapes": "(B, C, H, W) → (B, C, H/2, W/2)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3, stride 2"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H/2, W/2)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "UpsampleBlock": {
+          "desc": "Nearest-neighbour upsample by 2× followed by a 3×3 conv.",
+          "shapes": "(B, C, H, W) → (B, C, 2H, 2W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "nearest upsample 2×"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, 2H, 2W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "UNetResBlock": {
+          "desc": "Residual block conditioned on a time embedding (added between the two convs).",
+          "shapes": "x:(B, C, H, W), t:(B, D) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "GroupNorm"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "SiLU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+ MLP(t_emb)  (broadcast)"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "GroupNorm"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "SiLU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              8,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "UNet": {
+          "desc": "Encoder-decoder with skip connections at matching resolutions; bottleneck attention.",
+          "shapes": "(B, C, H, W) → (B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  noised  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Encoder Block 1"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Down 2×"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Encoder Block 2"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Down 2×"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Bottleneck (+ self-attn)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Up 2×  + skip"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Decoder Block 2"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Up 2×  + skip"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Decoder Block 1"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv → ε̂"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  noise pred  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              1,
+              0,
+              9,
+              0
+            ],
+            [
+              3,
+              0,
+              7,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "NoisePredictor": {
+          "desc": "End-to-end ε-prediction network used by DDPM/DDIM samplers.",
+          "shapes": "x_t:(B, C, H, W), t:(B,) → ε̂:(B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "t  (B,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "image stem"
+              },
+              {
+                "kind": "ref",
+                "label": "SinusoidalTimeEmbedding"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "UNet"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "ε̂  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ZeroConv2d": {
+          "desc": "Conv2d initialised to zero — outputs zero at start so it can be added safely.",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv  (W = 0, b = 0 at init)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)  (= 0 at init)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ControlNetBlock": {
+          "desc": "Trainable copy of UNet encoder + ZeroConvs; outputs are added to the frozen UNet decoder.",
+          "shapes": "x, control → ΔUNet decoder features",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  noised  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "control image  (B, 3, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "frozen UNet encoder"
+              },
+              {
+                "kind": "op",
+                "label": "trainable encoder copy"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "ZeroConv on each level"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "add into UNet decoder skips"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "Δ feats  (multi-scale, matches UNet decoder)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "LoRALinear": {
+          "desc": "Frozen linear plus a low-rank residual B·A·x scaled by α/r.",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "frozen W · x"
+              },
+              {
+                "kind": "op",
+                "label": "A · x   (in → r)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "identity"
+              },
+              {
+                "kind": "op",
+                "label": "B · (A · x)   (r → out)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+  α/r ·"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "LoRAConv2d": {
+          "desc": "Same low-rank residual idea applied to 2-D convolutions.",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "frozen Conv"
+              },
+              {
+                "kind": "op",
+                "label": "Conv A  (C → r, k×k)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "identity"
+              },
+              {
+                "kind": "op",
+                "label": "Conv B  (r → C', 1×1)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+  α/r ·"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "HyperNetwork": {
+          "desc": "A meta-network that emits weights consumed by a target network.",
+          "shapes": "cond:(B, D_c) → params → y",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "condition  (B, D_c)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "meta MLP"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "generated weights θ"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "target net  (uses θ on input x)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (task-dependent)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "IPAdapterCrossAttention": {
+          "desc": "Two parallel cross-attentions (text and image) summed into the residual stream.",
+          "shapes": "x:(B, T, D), text/image features → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  Q  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "Cross-Attn  (text K, V)"
+              },
+              {
+                "kind": "attn",
+                "label": "Cross-Attn  (image K, V)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "gan": {
+      "desc": "GAN building blocks: StyleGAN, PGGAN, equalised LR.",
+      "blocks": {
+        "EqualLinear": {
+          "desc": "Linear with equalized learning rate: weight scaled at runtime by gain/√fan_in.",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "matmul  x · (W · s)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "+ bias · lr_mul"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "EqualConv2d": {
+          "desc": "Conv2d with equalized learning rate (StyleGAN family).",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv with W · (gain/√(k²·C))"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "+ bias"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "GeneratorBlock": {
+          "desc": "Vanilla generator block: upsample → conv → norm → activation.",
+          "shapes": "(B, C, H, W) → (B, C', 2H, 2W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Upsample 2×"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "BatchNorm"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "ReLU"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', 2H, 2W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DiscriminatorBlock": {
+          "desc": "Vanilla discriminator block: strided conv → norm → leaky ReLU.",
+          "shapes": "(B, C, H, W) → (B, C', H/2, W/2)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3, stride 2"
+              }
+            ],
+            [
+              {
+                "kind": "norm",
+                "label": "InstanceNorm"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "LeakyReLU 0.2"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H/2, W/2)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MappingNetwork": {
+          "desc": "8-layer MLP with reduced LR that maps z → w (StyleGAN).",
+          "shapes": "z:(B, D) → w:(B, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "z  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "PixelNorm"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "EqualLinear × 8  (lr_mul = 0.01)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "w  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "StyleBlock": {
+          "desc": "Conv + per-pixel noise + AdaIN modulated by style w (StyleGAN v1).",
+          "shapes": "x:(B, C, H, W), w:(B, D) → y",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "w  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 3×3"
+              },
+              {
+                "kind": "op",
+                "label": "A: linear w → (γ, β)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "+ Gaussian noise · learned scale"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "AdaIN(γ, β)"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "LeakyReLU"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ModulatedConv2d": {
+          "desc": "StyleGAN2 modulated conv: scale weights by style, demodulate, then convolve.",
+          "shapes": "x:(B, C, H, W), w:(B, D) → y",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "w  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "weights W"
+              },
+              {
+                "kind": "op",
+                "label": "A: linear w → s"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "W' = W · s"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "demod: W'' = W' / ||W'||"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv with W''"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MinibatchStdDev": {
+          "desc": "Append a per-batch standard-deviation map as an extra channel (PGGAN/StyleGAN).",
+          "shapes": "(B, C, H, W) → (B, C+1, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "std over batch  (per channel, per pixel)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "average → scalar"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "tile → (B, 1, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "concat as new channel"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C+1, H, W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              0,
+              0,
+              4,
+              0
+            ]
+          ],
+          "edges": null
+        },
+        "ProgressiveGrowing": {
+          "desc": "Fade in a new high-res block via α-blend with the previous resolution (PGGAN).",
+          "shapes": "x → upsampled / new block → y",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "old layers (already trained)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "new high-res layer"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "(1−α) old  +  α new"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', 2H, 2W)"
+              }
+            ]
+          ],
+          "skips": [
+            [
+              1,
+              0,
+              3,
+              0
+            ]
+          ],
+          "edges": null
+        }
+      }
+    },
+    "vit": {
+      "desc": "Vision Transformer blocks.",
+      "blocks": {
+        "PatchEmbedding": {
+          "desc": "Strided p×p conv that turns an image into a sequence of patch tokens.",
+          "shapes": "(B, C, H, W) → (B, N, D),  N = (H/p)·(W/p)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv  kernel = stride = p"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "flatten spatial"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "transpose → (B, N, D)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "tokens  (B, N, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "CLSToken": {
+          "desc": "Prepend a learnable [CLS] token to each sequence (used as the global representation).",
+          "shapes": "(B, N, D) → (B, 1+N, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "tokens  (B, N, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "prepend [CLS]  (learnable, broadcast over batch)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "tokens'  (B, 1+N, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SwinWindowAttention": {
+          "desc": "Self-attention restricted to non-overlapping w×w windows with relative-pos bias.",
+          "shapes": "(B, N, C) → (B, N, C)  with implicit (H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, H, W, C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "window partition  (w × w)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "MHA + relative position bias"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "window reverse"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, H, W, C)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ShiftedWindowAttention": {
+          "desc": "Cyclic-shift variant that lets adjacent windows exchange information.",
+          "shapes": "(B, N, C) → (B, N, C)  with implicit (H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, H, W, C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "cyclic shift (−w/2)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "window partition"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "MHA + shifted-window mask"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "window reverse"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "cyclic shift (+w/2)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, H, W, C)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MaskedImageModeling": {
+          "desc": "MAE/BEiT objective: random-mask patches, encode visible tokens, reconstruct.",
+          "shapes": "(B, N, D) → masked, (B, N, p²·C) reconstructed",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "image patches  (B, N, p²·C)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "random mask (≈ 75 %)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "encoder  (visible tokens only)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "insert [MASK] tokens"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "decoder"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "reconstructed patches  (B, N, p²·C)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "sequence": {
+      "desc": "Recurrent and state-space sequence models.",
+      "blocks": {
+        "RNNCell": {
+          "desc": "Vanilla recurrent cell: h_t = tanh(W_x x_t + W_h h_{t-1} + b).",
+          "shapes": "x_t:(B, D_x), h_{t-1}:(B, D_h) → h_t:(B, D_h)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, D_x)"
+              },
+              {
+                "kind": "io",
+                "label": "h_{t−1}  (B, D_h)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "W_x · x_t"
+              },
+              {
+                "kind": "op",
+                "label": "W_h · h_{t−1}"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+ b"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "tanh"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "h_t  (B, D_h)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "LSTMCell": {
+          "desc": "Long short-term memory cell with input/forget/cell/output gates.",
+          "shapes": "x_t, h_{t-1}, c_{t-1} → h_t, c_t",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, D_x)"
+              },
+              {
+                "kind": "io",
+                "label": "h_{t−1}  (B, D_h)"
+              },
+              {
+                "kind": "io",
+                "label": "c_{t−1}  (B, D_h)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear → (i, f, g, o)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "c_t = f ⊙ c_{t−1} + i ⊙ g"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "h_t = o ⊙ tanh(c_t)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "h_t, c_t  (B, D_h)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "GRUCell": {
+          "desc": "Gated recurrent unit: reset (r), update (z) and candidate (n) gates.",
+          "shapes": "x_t, h_{t-1} → h_t",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, D_x)"
+              },
+              {
+                "kind": "io",
+                "label": "h_{t−1}  (B, D_h)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear → (r, z, n)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "h_t = (1 − z) ⊙ h_{t−1} + z ⊙ n"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "h_t  (B, D_h)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "StateSpaceModel": {
+          "desc": "Linear SSM with discretized A, B and an output mapping y = C h + D u.",
+          "shapes": "u:(B, T, D) → y:(B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "u_t  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "discretize  Ā = exp(Δ·A),  B̄ = (Ā − I)·A⁻¹·B"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "scan  h_t = Ā h_{t−1} + B̄ u_t"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "y_t = C h_t + D u_t"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y_t  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MambaBlock": {
+          "desc": "Selective state-space block: gates, conv, input-dependent SSM, gated output.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "in_proj  (D → 2·D')"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 1D"
+              },
+              {
+                "kind": "act",
+                "label": "SiLU (gate path)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "selective SSM  (A, Δ, B, C from x)"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "⊙ SiLU(gate)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "out_proj  (D' → D)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "gnn": {
+      "desc": "Graph neural network layers.",
+      "blocks": {
+        "MessagePassing": {
+          "desc": "Generic message-passing skeleton: message → aggregate → update.",
+          "shapes": "X:(N, F), edges:(2, E) → X':(N, F')",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "node feats X  (N, F)"
+              },
+              {
+                "kind": "io",
+                "label": "edges (i, j)  (2, E)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "message  m_ij = φ(h_i, h_j, e_ij)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "aggregate  m_j = Σ_{i ∈ N(j)} m_ij"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "update  h_j' = ψ(h_j, m_j)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "X'  (N, F')"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "GraphConv": {
+          "desc": "GCN propagation: H' = Â · X · W with symmetric normalisation.",
+          "shapes": "X:(N, F), A:(N, N) → H':(N, F')",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "X  (N, F)"
+              },
+              {
+                "kind": "io",
+                "label": "A  (N, N)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Â = D^(−1/2) (A + I) D^(−1/2)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "H' = Â · X · W"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "H'  (N, F')"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "GraphAttention": {
+          "desc": "GAT: per-edge attention coefficients followed by neighbour aggregation.",
+          "shapes": "X:(N, F), edges → H':(N, F')",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "X  (N, F)"
+              },
+              {
+                "kind": "io",
+                "label": "edges  (2, E)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear projection W·h"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "attention coef α_ij per edge"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "softmax over neighbours"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "aggregate  Σ α_ij · W·h_j"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "H'  (N, F')"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "generative": {
+      "desc": "VAE, autoregressive, normalising-flow, EBM, diffusion schedulers.",
+      "blocks": {
+        "VAE": {
+          "desc": "Encoder → posterior (μ, σ) → reparameterised z → decoder.",
+          "shapes": "(B, C, H, W) → (B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "encoder"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear → (μ, log σ²)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "z = μ + ε ⊙ σ,   ε ∼ N(0, I)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "decoder"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "x̂  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MaskedConv2d": {
+          "desc": "Conv2d with an autoregressive mask preventing each pixel from seeing future pixels (PixelCNN).",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv  (kernel multiplied by AR mask)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "AutoregressiveBlock": {
+          "desc": "Stack of masked convs producing a per-pixel distribution over the next pixel.",
+          "shapes": "(B, C, H, W) → (B, K, H, W)  logits",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "MaskedConv  type A"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "MaskedConv  type B  × N"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Conv 1×1 → logits"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "logits  (B, K, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "AffineCouplingLayer": {
+          "desc": "Normalising-flow coupling: split, predict scale/shift from one half, transform the other.",
+          "shapes": "x = (a, b) → y = (a, b · exp(s) + t)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x = (a, b)  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "NN(a) → (s, t)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "a' = a,  b' = b ⊙ exp(s) + t"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y = (a', b')  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "EnergyBasedModel": {
+          "desc": "A network that maps x to a scalar energy E(x); samples drawn via Langevin/MCMC.",
+          "shapes": "x → E(x):(B,)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, …)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "network"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "E(x)  (B,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DDPMScheduler": {
+          "desc": "Forward diffusion: x_t = √α̅_t · x_0 + √(1 − α̅_t) · ε.",
+          "shapes": "x_0, t → x_t",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_0  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "t  (B,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "β schedule → α̅_t = ∏(1 − β)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "x_t = √α̅_t · x_0 + √(1 − α̅_t) · ε"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "DDIMScheduler": {
+          "desc": "Deterministic non-Markovian sampler that reuses the predicted x̂_0.",
+          "shapes": "x_t, ε̂ → x_{t-1}",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, C, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "ε̂  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "x̂_0 = (x_t − √(1 − α̅_t) ε̂) / √α̅_t"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "x_{t−1} = √α̅_{t−1} · x̂_0 + √(1 − α̅_{t−1}) · ε̂"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "x_{t−1}  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "rl": {
+      "desc": "Reinforcement-learning building blocks.",
+      "blocks": {
+        "PolicyNetwork": {
+          "desc": "Maps a state to an action distribution / Gaussian (μ, σ) / discrete logits.",
+          "shapes": "s:(B, D_s) → π(a | s)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "state  (B, D_s)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "MLP trunk"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "head → π(a | s)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "action / dist  (B, D_a)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ValueNetwork": {
+          "desc": "Estimates V(s).",
+          "shapes": "s:(B, D_s) → V:(B,)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "state  (B, D_s)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "MLP"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "head → V(s)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "value  (B,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "QNetwork": {
+          "desc": "Estimates Q(s, a) — either by concatenating (s, a) or with one head per discrete action.",
+          "shapes": "s, a → Q:(B,)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "state, action  (B, D_s) + (B, D_a)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "concat / one-hot"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "MLP"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "Q(s, a)  (B,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ActorCritic": {
+          "desc": "Shared trunk that branches into a policy head and a value head.",
+          "shapes": "s → π(a | s),  V(s)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "state  (B, D_s)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "shared MLP trunk"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "policy head"
+              },
+              {
+                "kind": "op",
+                "label": "value head"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "π, V  (B, D_a), (B,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ReplayBuffer": {
+          "desc": "Ring buffer storing transitions; sampled in mini-batches for off-policy learning.",
+          "shapes": "(s, a, r, s', d) → batch",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "transition (s, a, r, s', d)  (·,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "ring buffer  (capacity N)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "uniform / prioritised sample"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "mini-batch  (B, ·)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "TargetNetwork": {
+          "desc": "Slowly-tracking copy of the online network used to stabilise bootstrap targets.",
+          "shapes": "θ_online → θ_target",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "θ_online  (params)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "θ_target ← τ · θ_target + (1 − τ) · θ_online"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "θ_target  (params)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "memory_retrieval": {
+      "desc": "External memory, vector stores, RAG, KV caches.",
+      "blocks": {
+        "ExternalMemory": {
+          "desc": "Soft attention over an external memory bank acts as a read operation.",
+          "shapes": "q:(B, D), mem:(M, D) → r:(B, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "query  (B, D)"
+              },
+              {
+                "kind": "io",
+                "label": "memory bank  (M, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "attention(query, mem, mem)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "retrieved  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "VectorStore": {
+          "desc": "Encode a corpus into a vector index, then look up the top-k nearest neighbours.",
+          "shapes": "corpus → index;  q → top-k",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "corpus  (N docs)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "encoder → embeddings"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "ANN index  (FAISS / HNSW / IVFPQ)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "query → top-k  (k, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "RAGModule": {
+          "desc": "Retrieval-Augmented Generation: retrieve top-k docs, condition the LM on them.",
+          "shapes": "query → answer",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "query  (T_q,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "VectorStore.retrieve  top-k"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "encode docs (token-level)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "cross-attention (LM ← docs)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "generated answer  (T_a,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "KVCache": {
+          "desc": "Cache K, V tensors per layer per token to skip re-encoding history.",
+          "shapes": "x_t → K_{1..t}, V_{1..t}",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_t  (B, 1, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "compute K_t, V_t"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "append to cache"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "cached K, V  (L, B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "embedding": {
+      "desc": "Token / positional / projection embeddings, contrastive losses.",
+      "blocks": {
+        "TokenEmbedding": {
+          "desc": "Lookup-table embedding: id → vector.",
+          "shapes": "(B, T) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "ids  (B, T)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "lookup  E[id]"
+              }
+            ],
+            [
+              {
+                "kind": "emb",
+                "label": "token emb  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "LearnedPositionalEmbedding": {
+          "desc": "A separate learned vector per absolute position, added to the token embedding.",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "positions 0..T−1  (T,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "lookup  P[pos]"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+ token emb"
+              }
+            ],
+            [
+              {
+                "kind": "emb",
+                "label": "pos-encoded tokens  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SinusoidalPositionalEmbedding": {
+          "desc": "Fixed sin/cos position encoding (Vaswani et al.).",
+          "shapes": "(B, T, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "position p  (T,)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "freqs = 10000^(−2i/D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "[sin(p·f),  cos(p·f)]"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+ token emb"
+              }
+            ],
+            [
+              {
+                "kind": "emb",
+                "label": "pos-encoded tokens  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ProjectionHead": {
+          "desc": "Two-layer MLP + L2 normalisation, used for contrastive / representation learning.",
+          "shapes": "(B, D) → (B, D')",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "GELU"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "linear"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "L2 normalize"
+              }
+            ],
+            [
+              {
+                "kind": "emb",
+                "label": "z  (B, D')"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "CLIPLoss": {
+          "desc": "Symmetric InfoNCE between matched image / text embeddings.",
+          "shapes": "z_img, z_txt:(B, D) → loss",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "image emb  (B, D)"
+              },
+              {
+                "kind": "io",
+                "label": "text emb  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "L2 normalize"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "logits = z_img · z_txtᵀ / τ"
+              }
+            ],
+            [
+              {
+                "kind": "loss",
+                "label": "symmetric cross-entropy (rows + cols)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "loss  (1,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "info_nce": {
+          "desc": "Pairwise InfoNCE used by SimCLR / MoCo.",
+          "shapes": "z₁, z₂:(B, D) → loss",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "z₁, z₂  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "L2 normalize"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "logits = z₁ · z₂ᵀ / τ"
+              }
+            ],
+            [
+              {
+                "kind": "loss",
+                "label": "cross-entropy with diagonal targets"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "loss  (1,)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "optimization": {
+      "desc": "Optimisers, schedulers, EMA, mixed-precision, checkpointing.",
+      "blocks": {
+        "Lion": {
+          "desc": "Sign-of-momentum optimiser (Chen et al. 2023).",
+          "shapes": "g, θ → θ'",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "grad g  (params)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "m ← β₁·m + (1 − β₁)·g"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "update = sign(β₂·m + (1 − β₂)·g)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "θ ← θ − lr · update"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "θ'  (params)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "Sophia": {
+          "desc": "Hessian-clipped second-order optimiser.",
+          "shapes": "g, h, θ → θ'",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "g, h  (params)  (Hessian estimate)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "m ← β₁·m + (1 − β₁)·g"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "update = clip(m / max(h, ε), ρ)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "θ ← θ − lr · update"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "θ'  (params)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "EMA": {
+          "desc": "Exponential moving average of model weights.",
+          "shapes": "θ_online → θ_ema",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "θ_online  (params)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "θ_ema ← τ · θ_ema + (1 − τ) · θ_online"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "θ_ema  (params)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MixedPrecisionTrainer": {
+          "desc": "Loss-scaled fp16 forward, fp32 master weights, gradient unscale + clip + step.",
+          "shapes": "x → updated θ",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, …)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "fp16 forward"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "loss × scale"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "backward (fp32 master grads)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "unscale + clip"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "optimizer step"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "updated θ  (params)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "CheckpointedSequential": {
+          "desc": "Sequential whose forward is rematerialised on the backward pass to save memory.",
+          "shapes": "(*) → (*)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (*)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "layer 1   (recompute on backward)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "layer 2   (recompute on backward)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "…  (k layers)"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (*)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "multimodal": {
+      "desc": "Multimodal / agentic blocks.",
+      "blocks": {
+        "CLIPEncoder": {
+          "desc": "Dual-tower image / text encoders with projection heads into a shared space.",
+          "shapes": "image, text → (z_img, z_txt)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "image  (B, 3, H, W)"
+              },
+              {
+                "kind": "io",
+                "label": "text tokens  (B, T)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "image transformer"
+              },
+              {
+                "kind": "op",
+                "label": "text transformer"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "projection"
+              },
+              {
+                "kind": "op",
+                "label": "projection"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "L2 norm"
+              },
+              {
+                "kind": "op",
+                "label": "L2 norm"
+              }
+            ],
+            [
+              {
+                "kind": "emb",
+                "label": "z_img  (B, D)"
+              },
+              {
+                "kind": "emb",
+                "label": "z_txt  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "PerceiverResampler": {
+          "desc": "Fixed-length learnable latents cross-attend over arbitrary-length media features.",
+          "shapes": "media:(B, M, D), latents:(L, D) → (B, L, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "learnable latents  (L, D)"
+              },
+              {
+                "kind": "io",
+                "label": "media features  (B, M, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "cross-attn  (latents query)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "FFN"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "× N layers"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "resampled latents  (B, L, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "QFormer": {
+          "desc": "BLIP-2 querying transformer: queries self-attend, then cross-attend to image features.",
+          "shapes": "queries, image feats → queries",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "learnable queries  (Q, D)"
+              },
+              {
+                "kind": "io",
+                "label": "image features  (B, M, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "Self-Attention"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "Cross-Attention (image)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "FFN"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "× N layers"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "queries  (B, Q, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ToolUseBlock": {
+          "desc": "Soft selector over a set of tools, each invoked, results merged back into the state.",
+          "shapes": "state → updated state",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "state  (B, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "tool selector  (softmax)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "Tool 1"
+              },
+              {
+                "kind": "op",
+                "label": "…"
+              },
+              {
+                "kind": "op",
+                "label": "Tool K"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "merge tool outputs"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "new state  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MemoryAttention": {
+          "desc": "Cross-attention layer that reads from an external memory bank.",
+          "shapes": "x:(B, T, D), mem:(M, D) → (B, T, D)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, T, D)"
+              },
+              {
+                "kind": "io",
+                "label": "memory bank  (M, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "cross-attention over memory"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, T, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "efficient": {
+      "desc": "Sparsity, quantisation, parallelism, low-rank.",
+      "blocks": {
+        "QuantizedLinearInt8": {
+          "desc": "Linear with weights stored in int8 + per-output-channel scale.",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)  fp"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "W_int8  (per-channel scale s)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "matmul x · W_int8"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "× s   (dequantise)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "+ bias"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "QuantizedLinear4bit": {
+          "desc": "Linear with weights packed to 4-bit + grouped scales / zeros (NF4 / GPTQ style).",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)  fp"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "unpack 4-bit → int"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "dequantise per group  (s, z)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "matmul x · W"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "+ bias"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "MagnitudePruner": {
+          "desc": "Zero-out weights with |W| below a threshold τ.",
+          "shapes": "W → sparse W'",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "weights W  (out, in)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "|W| < τ → mask = 0"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "W' = W ⊙ mask"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "sparse W'  (out, in)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "TokenPruner": {
+          "desc": "Drop low-importance tokens before further attention layers.",
+          "shapes": "(B, N, D) → (B, K, D),  K < N",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "tokens  (B, N, D)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "importance score per token"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "top-k keep"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "reduced tokens  (B, K, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "LowRankLinear": {
+          "desc": "Two stacked linears whose product approximates a full matrix W ≈ U Vᵀ.",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "down: linear  in → r"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "up: linear   r → out"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "ColumnParallelLinear": {
+          "desc": "Linear whose output columns are sharded across tensor-parallel ranks.",
+          "shapes": "x → y  (gathered)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)  replicated"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "split W cols across ranks"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "local matmul"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "all-gather"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)  gathered"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "RowParallelLinear": {
+          "desc": "Linear whose input is sharded across ranks; outputs all-reduced.",
+          "shapes": "x  (sharded) → y",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in/r)  sharded"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "local matmul"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "all-reduce sum"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "PipelineStage": {
+          "desc": "One stage of pipeline parallelism — receives micro-batches, computes, sends forward.",
+          "shapes": "x_chunk → y_chunk",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_chunk  (μb, …)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "stage_i forward"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "send to stage_{i+1}"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y_chunk  (μb, …)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    },
+    "specialized": {
+      "desc": "Specialised research blocks (NeuralODE, FNO, KAN, capsules, slots).",
+      "blocks": {
+        "NeuralODE": {
+          "desc": "Treat depth as continuous time and integrate dx/dt = f_θ(x, t).",
+          "shapes": "x_0 → x_T",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x_0  (B, D)"
+              },
+              {
+                "kind": "io",
+                "label": "f_θ(x, t)  (·)→(·)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "ODE solver  (Euler / RK4 / dopri5)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "x(T) = x_0 + ∫₀ᵀ f dt"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "x_T  (B, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SpectralConv2d": {
+          "desc": "Multiply low-frequency Fourier modes by learned weights (Fourier Neural Operator).",
+          "shapes": "(B, C, H, W) → (B, C', H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "FFT2"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "× learned weights  (low modes only)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "IFFT2"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C', H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "FNOBlock": {
+          "desc": "FNO block: spectral conv + 1×1 conv, summed and activated.",
+          "shapes": "(B, C, H, W) → (B, C, H, W)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, C, H, W)"
+              }
+            ],
+            [
+              {
+                "kind": "ref",
+                "label": "SpectralConv2d"
+              },
+              {
+                "kind": "op",
+                "label": "1×1 Conv"
+              }
+            ],
+            [
+              {
+                "kind": "merge",
+                "label": "+"
+              }
+            ],
+            [
+              {
+                "kind": "act",
+                "label": "GELU"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, C, H, W)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "KANLayer": {
+          "desc": "Kolmogorov–Arnold layer: every edge has a learned univariate spline; node = sum of edges.",
+          "shapes": "(B, in) → (B, out)",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "x  (B, in)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "learned spline  φ_ij(x_i)  per edge"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "sum over inputs at each output node"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "y  (B, out)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "CapsuleLayer": {
+          "desc": "Capsule routing layer (Sabour et al.): predict votes, dynamic routing-by-agreement, squash.",
+          "shapes": "primary caps → output caps",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "primary capsules u_i  (N₁, d₁)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "votes  û_{j|i} = W_ij · u_i"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "dynamic routing × T"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "squash"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "output capsules v_j  (N₂, d₂)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        },
+        "SlotAttention": {
+          "desc": "Iterated cross-attention from a small set of slots into per-pixel features (SlotAttention).",
+          "shapes": "feats:(B, N, D), slots:(B, K, D) → slots",
+          "rows": [
+            [
+              {
+                "kind": "io",
+                "label": "features  (B, N, D)"
+              },
+              {
+                "kind": "io",
+                "label": "slots  (B, K, D)"
+              }
+            ],
+            [
+              {
+                "kind": "attn",
+                "label": "cross-attn  (slots query)"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "GRU update"
+              }
+            ],
+            [
+              {
+                "kind": "op",
+                "label": "× T iterations"
+              }
+            ],
+            [
+              {
+                "kind": "io",
+                "label": "updated slots  (B, K, D)"
+              }
+            ]
+          ],
+          "skips": [],
+          "edges": null
+        }
+      }
+    }
+  }
+}

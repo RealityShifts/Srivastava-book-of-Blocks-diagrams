@@ -1,0 +1,28 @@
+{
+  "name": "block-diagrams-editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Visual editor for block-diagram specs. Exports Mermaid, DSL .py, and Graph JSON.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "extract-library": "python3 scripts/extract_library.py"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.10.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.0"
+  }
+}

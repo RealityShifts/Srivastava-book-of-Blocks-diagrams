@@ -8,11 +8,15 @@ The 122 blocks shipped here act as a *built-in library*: you can author
 your own architecture spec file and ``_ref()`` any built-in block by
 name. Run::
 
-    python _generate.py --specs my_arch.py --out ./diagrams
+    python _generate.py --specs my_arch.py --out ./out
 
 to generate diagrams for your blocks; pass ``--specs`` multiple times to
 merge several files. Add ``--no-builtins`` to skip regenerating the 122
 library files (they remain available as resolvable references).
+
+By default, generated files land under ``./diagrams/<category>/<Name>.md``
+(repo-root ``diagrams/`` keeps the source tree uncluttered). Pass ``--out``
+to send them elsewhere.
 
 Each block produces a self-contained Markdown file under
 ``<category>/<BlockName>.md`` containing one
@@ -63,12 +67,15 @@ import argparse
 import importlib.util
 import os
 import sys
+from collections import namedtuple
 from pathlib import Path
-from typing import Dict, FrozenSet, List, Optional, Sequence, Tuple
+from typing import Any, Dict, FrozenSet, List, Optional, Sequence, Tuple  # noqa: F401
 
 # Re-exported so user spec files can keep doing ``from _generate import _io``.
 from dsl import (  # noqa: F401
     KINDS,
+    Edge,
+    Meta,
     Node,
     Row,
     Skip,
@@ -82,7 +89,19 @@ from dsl import (  # noqa: F401
     _emb,
     _loss,
     _ref,
+    _edge,
 )
+
+DEFAULT_OUT_SUBDIR = "diagrams"
+
+# Mermaid flowchart layout defaults. ``rankSpacing`` controls the gap (in
+# pixels) between consecutive ranks (rows in TD flow); ``nodeSpacing`` is
+# the gap between nodes in the same rank. Both are overridable per-run via
+# ``--rank-spacing`` / ``--node-spacing`` on the CLI and via kwargs on
+# :func:`render_diagram`.
+DEFAULT_RANK_SPACING = 10
+DEFAULT_NODE_SPACING = 30
+
 
 # ---------------------------------------------------------------------------
 # Mermaid styling shared by every diagram
@@ -100,7 +119,13 @@ STYLE = """    classDef io fill:#f1f5f9,stroke:#334155,stroke-width:1.4px,color:
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2"""
 
 Ports = Tuple[str, ...]
-SlotIds = List[List[Tuple[Ports, Ports]]]  # per row, per slot: (in_ports, out_ports)
+Slot = namedtuple("Slot", ["in_ports", "out_ports", "in_shape", "out_shape", "uid"])
+SlotIds = List[List[Slot]]
+EdgeRec = namedtuple("EdgeRec", ["src", "dst", "style", "label"])
+# style ∈ {"solid", "skip", "mismatch"}
+
+
+MISMATCH_STYLE = "stroke:#dc2626,stroke-width:2.2px,color:#991b1b"
 
 
 # ---------------------------------------------------------------------------
@@ -114,29 +139,79 @@ def _label(text: str) -> str:
     return text.replace('"', "&quot;").replace("`", "&#96;")
 
 
-def _spec_rows_skips(spec: Spec) -> Tuple[List[Row], Sequence[Skip]]:
+def _node_parts(node: Node) -> Tuple[str, str, Meta]:
+    if len(node) == 2:
+        return node[0], node[1], {}
+    return node[0], node[1], node[2]
+
+
+def _spec_unpack(spec: Spec) -> Tuple[str, str, List[Row], Sequence[Skip], Optional[Sequence[Edge]]]:
     if len(spec) == 3:
-        return spec[2], ()
-    return spec[2], spec[3]
+        desc, shapes, rows = spec
+        return desc, shapes, rows, (), None
+    if len(spec) == 4:
+        desc, shapes, rows, skips = spec
+        return desc, shapes, rows, skips, None
+    desc, shapes, rows, skips, edges = spec
+    return desc, shapes, rows, skips, edges
+
+
+def _norm_shape(s: Optional[str]) -> Optional[str]:
+    return None if s is None else "".join(s.split())
+
+
+def _shape_check(src: Slot, dst: Slot) -> Tuple[bool, Optional[str]]:
+    """Return (mismatch?, label_text). Only flags when both ends declare shapes."""
+    if src.out_shape is None or dst.in_shape is None:
+        return False, None
+    if _norm_shape(src.out_shape) == _norm_shape(dst.in_shape):
+        return False, None
+    return True, f"{src.out_shape} ≠ {dst.in_shape}"
+
+
+def _build_edges(
+    src: Slot,
+    dst: Slot,
+    *,
+    style: str = "solid",
+    label: Optional[str] = None,
+) -> List[EdgeRec]:
+    mismatch, mlabel = _shape_check(src, dst)
+    if mismatch and style != "skip":
+        style = "mismatch"
+        label = mlabel
+    return [
+        EdgeRec(s, d, style, label)
+        for s in src.out_ports
+        for d in dst.in_ports
+    ]
 
 
 def _render_rows(
     rows: List[Row],
     skips: Sequence[Skip],
+    edges_explicit: Optional[Sequence[Edge]],
     registry: Optional[Dict[str, Spec]],
     max_depth: int,
     depth: int,
     prefix: str,
     ancestors: FrozenSet[str],
-) -> Tuple[List[str], SlotIds]:
-    lines: List[str] = []
+) -> Tuple[List[str], List[EdgeRec], SlotIds]:
+    node_lines: List[str] = []
+    edge_recs: List[EdgeRec] = []
     slot_ids: SlotIds = []
+    id_to_pos: Dict[str, Tuple[int, int]] = {}
 
     for r, row in enumerate(rows):
-        row_slots: List[Tuple[Ports, Ports]] = []
-        for c, (kind, label) in enumerate(row):
+        row_slots: List[Slot] = []
+        for c, node in enumerate(row):
+            kind, label, meta = _node_parts(node)
             assert kind in KINDS, f"unknown kind {kind!r} in row {r} col {c}"
             nid = f"{prefix}{r}_{c}"
+            uid: Optional[str] = meta.get("id")
+            in_shape: Optional[str] = meta.get("in")
+            out_shape: Optional[str] = meta.get("out")
+
             sub: Optional[Spec] = None
             if (
                 kind == "ref"
@@ -148,60 +223,138 @@ def _render_rows(
                 sub = registry[label]
 
             if sub is not None:
-                sub_rows, sub_skips = _spec_rows_skips(sub)
-                sub_lines, sub_slots = _render_rows(
-                    sub_rows, sub_skips, registry, max_depth,
+                _, _, sub_rows, sub_skips, sub_edges = _spec_unpack(sub)
+                sub_node_lines, sub_edges_out, sub_slots = _render_rows(
+                    sub_rows, sub_skips, sub_edges, registry, max_depth,
                     depth + 1, f"{nid}_", ancestors | {label},
                 )
-                lines.append(f'subgraph {nid}["{_label(label)}"]')
-                lines.extend("    " + ln for ln in sub_lines)
-                lines.append("end")
+                node_lines.append(f'subgraph {nid}["{_label(label)}"]')
+                node_lines.extend("    " + ln for ln in sub_node_lines)
+                node_lines.append("end")
+                # Inner edges bubble up to the flat list so linkStyle indices
+                # remain consistent across the whole diagram.
+                edge_recs.extend(sub_edges_out)
                 # Aggregate every port of the first row (entry) and last row (exit)
                 # so parents fan in / out across the full IO boundary of the sub-block.
-                in_ports = tuple(p for slot in sub_slots[0] for p in slot[0])
-                out_ports = tuple(p for slot in sub_slots[-1] for p in slot[1])
-                row_slots.append((in_ports, out_ports))
+                in_ports = tuple(p for slot in sub_slots[0] for p in slot.in_ports)
+                out_ports = tuple(p for slot in sub_slots[-1] for p in slot.out_ports)
+                row_slots.append(Slot(in_ports, out_ports, in_shape, out_shape, uid))
             else:
-                lines.append(f'{nid}["{_label(label)}"]:::{kind}')
-                row_slots.append(((nid,), (nid,)))
+                node_lines.append(f'{nid}["{_label(label)}"]:::{kind}')
+                row_slots.append(Slot((nid,), (nid,), in_shape, out_shape, uid))
+
+            if uid is not None:
+                if uid in id_to_pos:
+                    raise ValueError(
+                        f"duplicate node id {uid!r} in block at scope {prefix!r}"
+                    )
+                id_to_pos[uid] = (r, c)
         slot_ids.append(row_slots)
 
-    # auto edges between consecutive rows
-    for r in range(len(rows) - 1):
-        a, b = slot_ids[r], slot_ids[r + 1]
-        if len(a) == len(b) and len(a) > 1:
-            for c in range(len(a)):
-                for src in a[c][1]:
-                    for dst in b[c][0]:
-                        lines.append(f"{src} --> {dst}")
-        else:
-            for ci in range(len(a)):
-                for cj in range(len(b)):
-                    for src in a[ci][1]:
-                        for dst in b[cj][0]:
-                            lines.append(f"{src} --> {dst}")
+    # Explicit edges short-circuit auto wiring entirely; otherwise fall back
+    # to the row-adjacency rule (column-aligned when widths match, else fan).
+    if edges_explicit is None:
+        for r in range(len(rows) - 1):
+            a, b = slot_ids[r], slot_ids[r + 1]
+            if len(a) == len(b) and len(a) > 1:
+                for c in range(len(a)):
+                    edge_recs.extend(_build_edges(a[c], b[c]))
+            else:
+                for ci in range(len(a)):
+                    for cj in range(len(b)):
+                        edge_recs.extend(_build_edges(a[ci], b[cj]))
+    else:
+        for spec_edge in edges_explicit:
+            if len(spec_edge) == 2:
+                src_id, dst_id = spec_edge
+                e_label: Optional[str] = None
+            else:
+                src_id, dst_id, e_label = spec_edge
+            if src_id not in id_to_pos:
+                raise ValueError(f"edge references unknown id: {src_id!r}")
+            if dst_id not in id_to_pos:
+                raise ValueError(f"edge references unknown id: {dst_id!r}")
+            sr, sc = id_to_pos[src_id]
+            dr, dc = id_to_pos[dst_id]
+            edge_recs.extend(
+                _build_edges(slot_ids[sr][sc], slot_ids[dr][dc], label=e_label)
+            )
 
-    # skip / residual edges (dashed)
+    # Skip / residual edges (dashed). Shape mismatches on skips don't recolour
+    # the line (skips are usually "same tensor, different path").
     for r1, c1, r2, c2 in skips:
-        for src in slot_ids[r1][c1][1]:
-            for dst in slot_ids[r2][c2][0]:
-                lines.append(f"{src} -. skip .-> {dst}")
+        edge_recs.extend(
+            _build_edges(slot_ids[r1][c1], slot_ids[r2][c2], style="skip", label="skip")
+        )
 
-    return lines, slot_ids
+    return node_lines, edge_recs, slot_ids
+
+
+def _edge_line(rec: EdgeRec) -> str:
+    if rec.style == "solid":
+        if rec.label:
+            return f'{rec.src} -->|"{_label(rec.label)}"| {rec.dst}'
+        return f"{rec.src} --> {rec.dst}"
+    if rec.style == "skip":
+        return f'{rec.src} -.->|"{_label(rec.label or "skip")}"| {rec.dst}'
+    if rec.style == "mismatch":
+        return f'{rec.src} ==>|"{_label(rec.label or "shape mismatch")}"| {rec.dst}'
+    raise ValueError(f"unknown edge style: {rec.style!r}")
+
+
+def _init_directive(rank_spacing: int, node_spacing: int) -> str:
+    """Mermaid ``%%{init}%%`` line that sets flowchart layout spacing.
+
+    See https://mermaid.js.org/syntax/flowchart.html#configuration — these
+    knobs are picked up by Mermaid >= 8 and tighten the vertical / horizontal
+    gaps between rendered nodes so dense block diagrams stay readable.
+    """
+    return (
+        "%%{init: {'flowchart': {"
+        f"'rankSpacing': {rank_spacing}, 'nodeSpacing': {node_spacing}"
+        "}}}%%"
+    )
 
 
 def render_diagram(
     rows: List[Row],
     skips: Sequence[Skip] = (),
+    edges: Optional[Sequence[Edge]] = None,
     *,
     registry: Optional[Dict[str, Spec]] = None,
     max_depth: int = 0,
+    block_name: str = "<unnamed>",
+    rank_spacing: int = DEFAULT_RANK_SPACING,
+    node_spacing: int = DEFAULT_NODE_SPACING,
 ) -> str:
-    body, _ = _render_rows(
-        rows, skips, registry, max_depth,
+    node_lines, edge_recs, _ = _render_rows(
+        rows, skips, edges, registry, max_depth,
         depth=0, prefix="n", ancestors=frozenset(),
     )
-    return "\n".join(["flowchart TD", *("    " + ln for ln in body), STYLE])
+
+    body: List[str] = list(node_lines)
+    mismatch_indices: List[int] = []
+    for i, rec in enumerate(edge_recs):
+        body.append(_edge_line(rec))
+        if rec.style == "mismatch":
+            mismatch_indices.append(i)
+            print(
+                f"  shape mismatch in {block_name}: "
+                f"{rec.src} → {rec.dst}  [{rec.label}]",
+                file=sys.stderr,
+            )
+    if mismatch_indices:
+        idx = ",".join(str(i) for i in mismatch_indices)
+        body.append(f"linkStyle {idx} {MISMATCH_STYLE}")
+
+    return "\n".join(
+        [
+            _init_directive(rank_spacing, node_spacing),
+            "flowchart TD",
+            *("    " + ln for ln in body),
+            STYLE,
+        ]
+    )
 
 
 def render_markdown(name: str, desc: str, shapes: str, body: str) -> str:
@@ -225,11 +378,28 @@ README_BODY = """\
 # Architecture diagrams
 
 One Mermaid `flowchart TD` per public block, organised by category. Specs
-live in [`blocks/`](./blocks); the DSL helpers live in [`dsl.py`](./dsl.py);
-the renderer is [`_generate.py`](./_generate.py). Regenerate everything with
+live in [`blocks/`](./blocks), the DSL helpers in [`dsl.py`](./dsl.py),
+and the renderer in [`_generate.py`](./_generate.py). All generated
+diagrams live under [`diagrams/`](./diagrams) — every block in the index
+below links to its own `.md` file there. Regenerate everything with
 
 ```bash
 python _generate.py
+```
+
+## Visual editor
+
+A React Flow-based web editor lives in [`editor/`](./editor) — drag from
+a palette of the 10 primitive kinds + all 122 built-in blocks, wire them
+together, get live shape-checking (mismatched edges turn red), then export
+to **Mermaid**, **DSL `.py`** (round-trips through `python _generate.py
+--specs ...`), or **Graph JSON**.
+
+```bash
+cd editor
+npm install
+npm run extract-library   # snapshot blocks/ -> public/library.json
+npm run dev               # http://localhost:5173
 ```
 
 ## Where these render
@@ -308,9 +478,12 @@ BLOCKS = {
 Then generate:
 
 ```bash
-python _generate.py --specs my_arch.py --out ./diagrams --depth 1
+# writes into ./diagrams/<your category>/<BlockName>.md by default
+python _generate.py --specs my_arch.py --depth 1
 # only your blocks, library kept as registered references:
-python _generate.py --specs my_arch.py --out ./diagrams --no-builtins
+python _generate.py --specs my_arch.py --no-builtins
+# or send the output anywhere else
+python _generate.py --specs my_arch.py --out ./out
 ```
 
 Pass `--specs` multiple times to merge several files. User block names
@@ -385,6 +558,31 @@ def _safe_rel(target: Path, root: Path) -> Optional[str]:
     return os.path.relpath(target, root)
 
 
+def _readme_index(
+    categories: CategoriesMap,
+    repo_root: Path,
+    paths: Dict[str, Path],
+) -> str:
+    """Build the per-category, collapsible block index that gets appended to
+    the static README body. Links are repo-relative so they work on GitHub.
+    """
+    lines = ["", "## Index", "", f"{sum(len(b) for _, b in categories.values())} blocks across {len(categories)} categories. Click a section to expand.", ""]
+    for cat, (desc, blocks) in categories.items():
+        lines.append(
+            f"<details><summary><b>{cat}</b> &middot; {desc} &middot; "
+            f"{len(blocks)} block{'s' if len(blocks) != 1 else ''}</summary>"
+        )
+        lines.append("")
+        for name in blocks:
+            target = paths.get(name)
+            rel = _safe_rel(target, repo_root) if target is not None else None
+            lines.append(f"- [{name}]({rel})" if rel else f"- {name}")
+        lines.append("")
+        lines.append("</details>")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def write_index(out_root: Path, categories: CategoriesMap, paths: Dict[str, Path]) -> None:
     """Write INDEX.md at ``out_root`` listing every block.
 
@@ -406,14 +604,6 @@ def write_index(out_root: Path, categories: CategoriesMap, paths: Dict[str, Path
     (out_root / "INDEX.md").write_text("\n".join(lines))
 
 
-def _spec_unpack(spec: Spec) -> Tuple[str, str, List[Row], Sequence[Skip]]:
-    if len(spec) == 3:
-        desc, shapes, rows = spec
-        return desc, shapes, rows, ()
-    desc, shapes, rows, skips = spec
-    return desc, shapes, rows, skips
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
@@ -433,17 +623,27 @@ def main() -> None:
     )
     parser.add_argument(
         "--out", type=Path, default=None, metavar="DIR",
-        help="Output directory (default: directory of this script).",
+        help="Output directory (default: ./diagrams next to this script).",
     )
     parser.add_argument(
         "--no-builtins", action="store_true",
         help="Don't regenerate built-in block .md files; keep them as registered "
              "references only.",
     )
+    parser.add_argument(
+        "--rank-spacing", type=int, default=DEFAULT_RANK_SPACING, metavar="PX",
+        help=f"Vertical gap (px) between Mermaid ranks. Default: {DEFAULT_RANK_SPACING}.",
+    )
+    parser.add_argument(
+        "--node-spacing", type=int, default=DEFAULT_NODE_SPACING, metavar="PX",
+        help=f"Horizontal gap (px) between nodes in the same rank. "
+             f"Default: {DEFAULT_NODE_SPACING}.",
+    )
     args = parser.parse_args()
 
     builtin_root = Path(__file__).parent.resolve()
-    out_root = (args.out.resolve() if args.out else builtin_root)
+    builtin_diagrams = builtin_root / DEFAULT_OUT_SUBDIR
+    out_root = (args.out.resolve() if args.out else builtin_diagrams)
     out_root.mkdir(parents=True, exist_ok=True)
 
     user_cats: CategoriesMap = {}
@@ -470,7 +670,7 @@ def main() -> None:
         for cat, (_, blocks) in CATEGORIES.items():
             for name in blocks:
                 name_to_path.setdefault(
-                    name, (builtin_root / cat / f"{name}.md").resolve(),
+                    name, (builtin_diagrams / cat / f"{name}.md").resolve(),
                 )
 
     total = 0
@@ -481,15 +681,29 @@ def main() -> None:
         for old in out_dir.glob("*.md"):
             old.unlink()
         for name, spec in blocks.items():
-            desc, shapes, rows, skips = _spec_unpack(spec)
-            body = render_diagram(rows, skips, registry=registry, max_depth=args.depth)
+            desc, shapes, rows, skips, edges = _spec_unpack(spec)
+            body = render_diagram(
+                rows, skips, edges,
+                registry=registry,
+                max_depth=args.depth,
+                block_name=name,
+                rank_spacing=args.rank_spacing,
+                node_spacing=args.node_spacing,
+            )
             md = render_markdown(name, desc, shapes, body)
             name_to_path[name].write_text(md)
             total += 1
 
-    # README only belongs to the built-in repo; don't clobber arbitrary --out trees.
-    if not args.specs and out_root == builtin_root:
-        (builtin_root / "README.md").write_text(README_BODY)
+    # README only belongs to the built-in repo; don't clobber arbitrary --out
+    # trees. We regenerate it whenever we're rendering the built-in library
+    # to its default home (no --specs and no custom --out).
+    rebuild_readme = (
+        not args.specs and out_root == builtin_diagrams
+    )
+    if rebuild_readme:
+        (builtin_root / "README.md").write_text(
+            README_BODY + "\n" + _readme_index(CATEGORIES, builtin_root, name_to_path)
+        )
 
     write_index(out_root, all_cats, name_to_path)
 
