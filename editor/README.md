@@ -39,8 +39,9 @@ npm run build        # production bundle in dist/
   and they disagree (whitespace-normalised), the edge turns **red** with a
   `(out) ≠ (in)` label. Exactly mirrors the renderer in
   [`../_generate.py`](../_generate.py).
-- **Toolbar** — Import JSON / **Import Mermaid** / Export JSON / Export Mermaid / Export DSL .py / Clear.
+- **Toolbar** — Import JSON / **Import Mermaid** / Export JSON / Export Mermaid / Export DSL .py / **Export PyTorch** / Clear.
   *Import Mermaid* parses any `.md` produced by `../_generate.py` (or by *Export Mermaid* itself) and drops it back onto the canvas. Subgraphs collapse to a single `_ref` node; per-port shapes don't survive the round-trip since they aren't encoded in Mermaid.
+  *Export PyTorch* compiles the current canvas to a runnable `nn.Module` backed by [`RealityShifts/Srivastava-book-of-Blocks`](https://github.com/RealityShifts/Srivastava-book-of-Blocks); each `_ref` node becomes a real instantiation of `pytorch_blocks.<category>.<ClassName>`. Constructor kwargs with no upstream default are emitted as `...` so you immediately see which dims you need to fill in.
 
 ## Authoring loop
 
@@ -59,15 +60,30 @@ npm run build        # production bundle in dist/
    open the `.md` exported directly from **Export Mermaid** if you just want
    the diagram.
 
-## Future: PyTorch / Flax codegen
+## PyTorch codegen
 
-The data model (kind + id + shapes + explicit edges) is already enough to
-emit PyTorch / Flax instantiation code by mapping `_ref(blockName)` to the
-class implementations in
-[`RealityShifts/Srivastava-book-of-Blocks`](https://github.com/RealityShifts/Srivastava-book-of-Blocks).
-A `src/generators/pytorch.ts` (and Flax counterpart) is the natural place
-to land that — it consumes the same `(meta, nodes, edges)` triple as the
-existing exporters.
+`Export PyTorch` (toolbar) emits a runnable `nn.Module`:
+
+- one attribute per `_ref` node, instantiated from `pytorch_blocks.<cat>.<Cls>`
+  using the upstream class's real constructor signature;
+- a topo-ordered `forward(...)` whose args are the source IO nodes;
+- inline torch ops for primitives whose label is unambiguous
+  (`+`, `concat`, `ReLU`, `GELU`, `softmax`, …);
+- `# TODO` lines for free-form labels and missing required kwargs.
+
+Class snapshot lives at `public/pytorch_blocks.json` (122 PyTorch classes
+across 17 sub-modules) and is read at runtime by
+`src/generators/pytorchCodegen.ts`. Refresh after upstream API changes:
+
+```bash
+git clone https://github.com/RealityShifts/Srivastava-book-of-Blocks /tmp/sbob
+npm run extract-block-registry -- /tmp/sbob
+```
+
+Flax codegen is **not yet shipped** (the registry is snapshotted, but the
+inline-op table and JAX-idiomatic forward emission still need work).
+Contributions welcome — `src/generators/flaxCodegen.ts` is the natural
+landing spot, mirroring the PyTorch one.
 
 ## Re-snapshotting the library
 
@@ -99,6 +115,7 @@ editor/
     │   ├── mermaid.ts            # → flowchart TD (same output as _generate.py)
     │   ├── reverseMermaid.ts     # ← flowchart TD (mirrors ../_reverse.py)
     │   ├── dsl.ts                # → user spec.py with explicit edges
+    │   ├── pytorchCodegen.ts     # → runnable nn.Module (mirrors ../_codegen.py)
     │   ├── json.ts               # → / ← GraphJSON
     │   └── topo.ts               # longest-path layering used by dsl.ts
     └── library/

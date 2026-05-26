@@ -1,0 +1,3459 @@
+{
+  "framework": "flax_blocks",
+  "modules": {
+    "attention_blocks": {
+      "MultiHeadAttention": {
+        "doc": "Pre-norm-friendly multi-head attention with optional causal masking.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "causal",
+            "annotation": "bool",
+            "default": "False",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "SelfAttention": {
+        "doc": "Single-head self-attention.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          },
+          {
+            "name": "causal",
+            "annotation": "bool",
+            "default": "False",
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      },
+      "CausalSelfAttention": {
+        "doc": "Decoder-style attention that cannot peek at future tokens.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      },
+      "CrossAttention": {
+        "doc": "Attention from a query stream to a separate key/value stream.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "ctx_dim",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 3
+      },
+      "WindowAttention": {
+        "doc": "Local attention restricted to fixed-size windows.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "window",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "LinearAttention": {
+        "doc": "Linear-complexity attention via the kernel trick (Performer-lite).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "FlashAttention": {
+        "doc": "Just MHA - kept as a separate name for clarity.",
+        "init": null,
+        "forward_arity": null
+      },
+      "RotaryEmbedding": {
+        "doc": "Rotary positional embedding (Su et al. 2021 / LLaMA).",
+        "init": [
+          {
+            "name": "head_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "base",
+            "annotation": "float",
+            "default": "10000.0",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "RelativePositionBias": {
+        "doc": "T5-style logarithmic relative-position bias.",
+        "init": [
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_buckets",
+            "annotation": "int",
+            "default": "32",
+            "kind": "positional"
+          },
+          {
+            "name": "max_distance",
+            "annotation": "int",
+            "default": "128",
+            "kind": "positional"
+          },
+          {
+            "name": "bidirectional",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "AttentionPooling": {
+        "doc": "Attention-weighted pooling with a single learnable query token.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      }
+    },
+    "cnn_vision_blocks": {
+      "InceptionBlock": {
+        "doc": "Naive Inception-v1 module: 1x1, 3x3, 5x5 and pool branches.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "c1",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "c3",
+            "annotation": "int",
+            "default": "96",
+            "kind": "positional"
+          },
+          {
+            "name": "c5",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "pool",
+            "annotation": "int",
+            "default": "32",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "_DenseLayer": {
+        "doc": null,
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "growth",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DenseBlock": {
+        "doc": "A dense block with ``num_layers`` densely-connected conv units.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_layers",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "growth",
+            "annotation": "int",
+            "default": "32",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SqueezeExcitation": {
+        "doc": "Hu et al. 2017 - SE channel attention.",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "ratio",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "CBAM": {
+        "doc": "Convolutional Block Attention Module (channel + spatial).",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "ratio",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "kernel",
+            "annotation": "int",
+            "default": "7",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SpatialPyramidPooling": {
+        "doc": "Multi-scale pyramid average pooling, output is flattened.",
+        "init": [
+          {
+            "name": "output_sizes",
+            "annotation": "Sequence[int]",
+            "default": "(1, 2, 4)",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "FeaturePyramidNetwork": {
+        "doc": "Top-down FPN with lateral 1x1 connections (Lin et al. 2017).",
+        "init": [
+          {
+            "name": "in_channels",
+            "annotation": "Sequence[int]",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": "256",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ASPP": {
+        "doc": "Atrous Spatial Pyramid Pooling - DeepLab v3.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": "256",
+            "kind": "positional"
+          },
+          {
+            "name": "dilations",
+            "annotation": "Sequence[int]",
+            "default": "(1, 6, 12, 18)",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "PixelShuffleUpsample": {
+        "doc": "Sub-pixel convolution: ESPCN / SRResNet upsampler.",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "scale",
+            "annotation": "int",
+            "default": "2",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DeformableConv2d": {
+        "doc": "Deformable convolution v1 (Dai et al. 2017), pure-JAX with bilinear sample.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "padding",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DeformableAttention": {
+        "doc": "Multi-head deformable attention (Zhu et al. - Deformable DETR).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "num_points",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      }
+    },
+    "core_blocks": {
+      "ConvBlock": {
+        "doc": "Conv -> Norm -> Activation: the standard conv \"lego\" piece.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "padding",
+            "annotation": "str",
+            "default": "'SAME'",
+            "kind": "positional"
+          },
+          {
+            "name": "dilation",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "groups",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "False",
+            "kind": "positional"
+          },
+          {
+            "name": "norm",
+            "annotation": "str",
+            "default": "'batch'",
+            "kind": "positional"
+          },
+          {
+            "name": "activation",
+            "annotation": "str",
+            "default": "'relu'",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DepthwiseSeparableConv": {
+        "doc": "Depthwise 3x3 -> pointwise 1x1 (MobileNet-style).",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "dilation",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DilatedConv": {
+        "doc": "Atrous (dilated) convolution preserving spatial size.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "dilation",
+            "annotation": "int",
+            "default": "2",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      },
+      "GroupConv": {
+        "doc": "Grouped convolution - ancestor of depthwise conv.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "groups",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      },
+      "InstanceNorm": {
+        "doc": "Per-sample, per-channel normalization (Ulyanov et al. 2016).",
+        "init": [
+          {
+            "name": "num_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "epsilon",
+            "annotation": "float",
+            "default": "1e-05",
+            "kind": "keyword"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "WeightNorm": {
+        "doc": "Salimans & Kingma 2016 - reparameterizes ``W = g * v / ||v||``.",
+        "init": [
+          {
+            "name": "base",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SpectralNorm": {
+        "doc": "Power-iteration spectral norm (Miyato et al. 2018).",
+        "init": [
+          {
+            "name": "base",
+            "annotation": "nnx.Linear",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "AdaIN": {
+        "doc": "Adaptive Instance Normalization (Huang & Belongie 2017).",
+        "init": [
+          {
+            "name": "num_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "style_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "SPADE": {
+        "doc": "Spatially-Adaptive (De)normalization (Park et al. 2019).",
+        "init": [
+          {
+            "name": "num_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "label_nc",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": "128",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "_Identity": {
+        "doc": null,
+        "init": null,
+        "forward_arity": 1
+      },
+      "ResidualBlock": {
+        "doc": "ResNet \"basic block\": ``y = act(F(x) + shortcut(x))``.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "int",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "norm",
+            "annotation": "str",
+            "default": "'batch'",
+            "kind": "positional"
+          },
+          {
+            "name": "activation",
+            "annotation": "str",
+            "default": "'relu'",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SkipConnection": {
+        "doc": "Generic residual / concat wrapper: ``y = combine(f(x), x)``.",
+        "init": [
+          {
+            "name": "fn",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "mode",
+            "annotation": "str",
+            "default": "'add'",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      }
+    },
+    "efficient_blocks": {
+      "QuantizedLinearInt8": {
+        "doc": "Simulated INT8 linear: stores INT8 weights, dequantizes for matmul.",
+        "init": [
+          {
+            "name": "in_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "QuantizedLinear4bit": {
+        "doc": "Simulated 4-bit symmetric weight quantization, two values per byte.",
+        "init": [
+          {
+            "name": "in_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "MagnitudePruner": {
+        "doc": "Unstructured magnitude pruning.",
+        "init": [
+          {
+            "name": "sparsity",
+            "annotation": "float",
+            "default": "0.5",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": null
+      },
+      "TokenPruner": {
+        "doc": "Drops the lowest-scoring tokens to a fixed keep ratio (DynamicViT-style).",
+        "init": [
+          {
+            "name": "keep_ratio",
+            "annotation": "float",
+            "default": "0.7",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "LowRankLinear": {
+        "doc": "Replaces a dense ``in -> out`` layer with two thin layers (rank ``r``).",
+        "init": [
+          {
+            "name": "in_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rank",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ColumnParallelLinear": {
+        "doc": "Linear whose ``out_features`` are sharded across the tensor-parallel group.",
+        "init": [
+          {
+            "name": "in_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "RowParallelLinear": {
+        "doc": "Linear whose ``in_features`` are sharded; performs all-reduce after matmul.",
+        "init": [
+          {
+            "name": "in_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "PipelineStage": {
+        "doc": "A single stage of a pipeline: takes input from prev stage, sends to next.",
+        "init": [
+          {
+            "name": "module",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "stage_id",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_stages",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      }
+    },
+    "embedding_blocks": {
+      "LearnedPositionalEmbedding": {
+        "doc": "Standard learned positional encoding (BERT-style).",
+        "init": [
+          {
+            "name": "max_len",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SinusoidalPositionalEmbedding": {
+        "doc": "Vaswani et al. 2017 - non-learned sinusoidal positions.",
+        "init": [
+          {
+            "name": "max_len",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ProjectionHead": {
+        "doc": "SimCLR-style 2-layer MLP projection head.",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "CLIPLoss": {
+        "doc": "CLIP loss with a learnable temperature ``logit_scale``.",
+        "init": [
+          {
+            "name": "init_temperature",
+            "annotation": "float",
+            "default": "0.07",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 2
+      }
+    },
+    "gan_blocks": {
+      "EqualLinear": {
+        "doc": "Equalized-LR linear used by Progressive GAN / StyleGAN.",
+        "init": [
+          {
+            "name": "in_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_features",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "gain",
+            "annotation": "float",
+            "default": "1.0",
+            "kind": "positional"
+          },
+          {
+            "name": "lr_mul",
+            "annotation": "float",
+            "default": "1.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "EqualConv2d": {
+        "doc": "Equalized-LR 2-D convolution (NHWC, StyleGAN family).",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "Union[int, tuple[int, int]]",
+            "default": "1",
+            "kind": "positional"
+          },
+          {
+            "name": "padding",
+            "annotation": "str",
+            "default": "'SAME'",
+            "kind": "positional"
+          },
+          {
+            "name": "use_bias",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "gain",
+            "annotation": "float",
+            "default": "1.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "GeneratorBlock": {
+        "doc": "Up-sample -> conv -> norm -> ReLU.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "scale",
+            "annotation": "int",
+            "default": "2",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DiscriminatorBlock": {
+        "doc": "Strided 4x4 conv -> instance-norm -> LeakyReLU(0.2).",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "strides",
+            "annotation": "int",
+            "default": "2",
+            "kind": "positional"
+          },
+          {
+            "name": "use_norm",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "MappingNetwork": {
+        "doc": "StyleGAN ``z -> w`` mapping network (8-layer MLP).",
+        "init": [
+          {
+            "name": "z_dim",
+            "annotation": "int",
+            "default": "512",
+            "kind": "positional"
+          },
+          {
+            "name": "w_dim",
+            "annotation": "int",
+            "default": "512",
+            "kind": "positional"
+          },
+          {
+            "name": "num_layers",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ModulatedConv2d": {
+        "doc": "StyleGAN2 modulated/demodulated convolution (NHWC).",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "w_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "demodulate",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "StyleBlock": {
+        "doc": "ModulatedConv + noise injection + leaky-ReLU.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "w_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 3
+      },
+      "MinibatchStdDev": {
+        "doc": "Karras et al. 2017 - appends per-batch std as an extra feature map.",
+        "init": [
+          {
+            "name": "group_size",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ProgressiveGrowing": {
+        "doc": "Smooth fade between low- and high-resolution outputs by ``alpha``.",
+        "init": [
+          {
+            "name": "low_res_block",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "high_res_block",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      }
+    },
+    "generative_blocks": {
+      "VAE": {
+        "doc": "Minimal convolutional VAE (NHWC); designed for 64x64 inputs by default.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "latent",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "channels",
+            "annotation": "Sequence[int]",
+            "default": "(32, 64, 128, 256)",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "MaskedConv2d": {
+        "doc": "Masked 2D conv used by PixelCNN.",
+        "init": [
+          {
+            "name": "mask_type",
+            "annotation": "str",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "kernel_size",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "AutoregressiveBlock": {
+        "doc": "A residual gated PixelCNN block.",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "AffineCouplingLayer": {
+        "doc": "RealNVP affine coupling: half the dims are scaled/shifted by the other half.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": "128",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "EnergyBasedModel": {
+        "doc": "Wraps any net so its scalar output is the energy ``E_theta(x)``.",
+        "init": [
+          {
+            "name": "backbone",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DDPMScheduler": {
+        "doc": "Standard DDPM linear-beta scheduler with q-sample / step utilities.",
+        "init": [
+          {
+            "name": "num_steps",
+            "annotation": "int",
+            "default": "1000",
+            "kind": "positional"
+          },
+          {
+            "name": "beta_start",
+            "annotation": "float",
+            "default": "0.0001",
+            "kind": "positional"
+          },
+          {
+            "name": "beta_end",
+            "annotation": "float",
+            "default": "0.02",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": null
+      },
+      "DDIMScheduler": {
+        "doc": "Deterministic DDIM step (Song et al. 2020).",
+        "init": null,
+        "forward_arity": null
+      }
+    },
+    "gnn_blocks": {
+      "MessagePassing": {
+        "doc": "Generic message passing scaffold; subclass and override ``message``.",
+        "init": null,
+        "forward_arity": 3
+      },
+      "GraphConv": {
+        "doc": "Symmetric-normalized GCN: ``X' = D^{-1/2} A D^{-1/2} X W``.",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "GraphAttention": {
+        "doc": "Multi-head Graph Attention layer (Velickovic 2018).",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "heads",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "negative_slope",
+            "annotation": "float",
+            "default": "0.2",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      }
+    },
+    "memory_retrieval_blocks": {
+      "ExternalMemory": {
+        "doc": "Soft addressable key/value memory (NTM/Memory-Networks flavour).",
+        "init": [
+          {
+            "name": "num_slots",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "key_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "value_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "VectorStore": {
+        "doc": "Tiny in-memory vector store with cosine top-k search.",
+        "init": [],
+        "forward_arity": null
+      },
+      "RAGModule": {
+        "doc": "Retriever + generator container.",
+        "init": [
+          {
+            "name": "encoder",
+            "annotation": "Callable[[list[str]], jax.Array]",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "generator",
+            "annotation": "Callable[[str], str]",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "top_k",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "KVCache": {
+        "doc": "Per-layer growable cache for transformer decoding.",
+        "init": [
+          {
+            "name": "num_layers",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": null
+      }
+    },
+    "multimodal_blocks": {
+      "CLIPEncoder": {
+        "doc": "Maps a vision and a text tower into a joint L2-normalized space.",
+        "init": [
+          {
+            "name": "vision_encoder",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "text_encoder",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "vision_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "text_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "embed_dim",
+            "annotation": "int",
+            "default": "512",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      },
+      "PerceiverResampler": {
+        "doc": "Compresses a long sequence of input tokens into ``num_latents`` queries.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_latents",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "depth",
+            "annotation": "int",
+            "default": "6",
+            "kind": "positional"
+          },
+          {
+            "name": "mlp_ratio",
+            "annotation": "float",
+            "default": "4.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "QFormer": {
+        "doc": "Bridges a frozen image encoder and a frozen LLM via learnable queries.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": "768",
+            "kind": "positional"
+          },
+          {
+            "name": "num_queries",
+            "annotation": "int",
+            "default": "32",
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "12",
+            "kind": "positional"
+          },
+          {
+            "name": "depth",
+            "annotation": "int",
+            "default": "6",
+            "kind": "positional"
+          },
+          {
+            "name": "image_dim",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "llm_dim",
+            "annotation": "int",
+            "default": "4096",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ToolUseBlock": {
+        "doc": "Lightweight tool dispatcher.",
+        "init": [],
+        "forward_arity": 1
+      },
+      "MemoryAttention": {
+        "doc": "Cross-attention over an external memory bank (e.g. retrieved facts).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "mem_dim",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      }
+    },
+    "optimization_blocks": {
+      "SGDState": {
+        "doc": null,
+        "init": null,
+        "forward_arity": null
+      },
+      "AdamState": {
+        "doc": null,
+        "init": null,
+        "forward_arity": null
+      },
+      "LionState": {
+        "doc": null,
+        "init": null,
+        "forward_arity": null
+      },
+      "SophiaState": {
+        "doc": null,
+        "init": null,
+        "forward_arity": null
+      },
+      "RMSPropState": {
+        "doc": null,
+        "init": null,
+        "forward_arity": null
+      },
+      "EMA": {
+        "doc": "Maintains an EMA copy of model parameters.",
+        "init": [
+          {
+            "name": "model",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "decay",
+            "annotation": "float",
+            "default": "0.999",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": null
+      },
+      "LossScaler": {
+        "doc": "Dynamic loss scaler used with float16 mixed-precision training.",
+        "init": [
+          {
+            "name": "init_scale",
+            "annotation": "float",
+            "default": "2 ** 15",
+            "kind": "positional"
+          },
+          {
+            "name": "growth_interval",
+            "annotation": "int",
+            "default": "2000",
+            "kind": "positional"
+          },
+          {
+            "name": "growth_factor",
+            "annotation": "float",
+            "default": "2.0",
+            "kind": "positional"
+          },
+          {
+            "name": "backoff",
+            "annotation": "float",
+            "default": "0.5",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": null
+      }
+    },
+    "rl_blocks": {
+      "_MLP": {
+        "doc": null,
+        "init": [
+          {
+            "name": "dims",
+            "annotation": "Sequence[int]",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "activation",
+            "annotation": "str",
+            "default": "'tanh'",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "PolicyNetwork": {
+        "doc": "Stochastic policy outputting categorical or Gaussian-action parameters.",
+        "init": [
+          {
+            "name": "state_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "action_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Sequence[int]",
+            "default": "(128, 128)",
+            "kind": "positional"
+          },
+          {
+            "name": "discrete",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "ValueNetwork": {
+        "doc": "State value ``V_phi(s)``.",
+        "init": [
+          {
+            "name": "state_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Sequence[int]",
+            "default": "(128, 128)",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "QNetwork": {
+        "doc": "Action-value ``Q(s, a)`` with a discrete output head.",
+        "init": [
+          {
+            "name": "state_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "action_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Sequence[int]",
+            "default": "(128, 128)",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ActorCritic": {
+        "doc": "Combined actor-critic network sharing a torso.",
+        "init": [
+          {
+            "name": "state_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "action_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Sequence[int]",
+            "default": "(128, 128)",
+            "kind": "positional"
+          },
+          {
+            "name": "discrete",
+            "annotation": "bool",
+            "default": "True",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "ReplayBuffer": {
+        "doc": "Fixed-capacity FIFO replay buffer with random sampling.",
+        "init": [
+          {
+            "name": "capacity",
+            "annotation": "int",
+            "default": "100000",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": null
+      },
+      "TargetNetwork": {
+        "doc": "Wrap a network and keep a slowly-updated copy of its parameters.",
+        "init": [
+          {
+            "name": "source",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "tau",
+            "annotation": "float",
+            "default": "0.005",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 0
+      }
+    },
+    "sequence_blocks": {
+      "RNNCell": {
+        "doc": "``h_t = tanh(W_ih x_t + W_hh h_{t-1} + b)``.",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "LSTMCell": {
+        "doc": "LSTM cell with explicit input/forget/cell/output gates.",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "GRUCell": {
+        "doc": "Cho et al. 2014 - simplified gating.",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "StateSpaceModel": {
+        "doc": "Diagonal SSM with learnable continuous parameters, ZOH-discretized.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "state_dim",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "MambaBlock": {
+        "doc": "A small Mamba-style block: depthwise conv + selective scan + gate.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "state_dim",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "conv_kernel",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "expand",
+            "annotation": "int",
+            "default": "2",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      }
+    },
+    "specialized_blocks": {
+      "NeuralODE": {
+        "doc": "Continuous-depth network: integrate ``dh/dt = f_theta(h, t)`` with explicit Euler.",
+        "init": [
+          {
+            "name": "dynamics",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_steps",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "t0",
+            "annotation": "float",
+            "default": "0.0",
+            "kind": "positional"
+          },
+          {
+            "name": "t1",
+            "annotation": "float",
+            "default": "1.0",
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SpectralConv2d": {
+        "doc": "The core spectral conv used inside FNO (NHWC layout).",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "modes_h",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "modes_w",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "FNOBlock": {
+        "doc": "Spectral conv + 1x1 residual + GELU (Li et al. 2020).",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "modes_h",
+            "annotation": "int",
+            "default": "12",
+            "kind": "positional"
+          },
+          {
+            "name": "modes_w",
+            "annotation": "int",
+            "default": "12",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "KANLayer": {
+        "doc": "A single layer of a Kolmogorov-Arnold Network (Liu et al. 2024).",
+        "init": [
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_grid",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "grid_range",
+            "annotation": "tuple[float, float]",
+            "default": "(-1.0, 1.0)",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "CapsuleLayer": {
+        "doc": "Fully-connected capsule layer with dynamic routing.",
+        "init": [
+          {
+            "name": "num_in",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "dim_in",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_out",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "dim_out",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "routing_iters",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SlotAttention": {
+        "doc": "Slot Attention (Locatello et al. 2020) for object-centric learning.",
+        "init": [
+          {
+            "name": "num_slots",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "iters",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "hidden_mlp",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "eps",
+            "annotation": "float",
+            "default": "1e-08",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      }
+    },
+    "transformer_blocks": {
+      "FeedForward": {
+        "doc": "Vanilla two-layer MLP used inside transformer blocks.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "activation",
+            "annotation": "str",
+            "default": "'gelu'",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SwiGLU": {
+        "doc": "SwiGLU FFN: ``Linear(SiLU(W1 x) * W3 x) -> W2``  (LLaMA / PaLM).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "GEGLU": {
+        "doc": "GEGLU FFN: GLU variant gated by GELU (Shazeer 2020).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "TransformerEncoderBlock": {
+        "doc": "Pre-norm encoder block (BERT/ViT style).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "mlp_ratio",
+            "annotation": "float",
+            "default": "4.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "TransformerDecoderBlock": {
+        "doc": "Pre-norm decoder block: causal self-attn + cross-attn + MLP.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "mlp_ratio",
+            "annotation": "float",
+            "default": "4.0",
+            "kind": "positional"
+          },
+          {
+            "name": "ctx_dim",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 3
+      },
+      "MixtureOfExperts": {
+        "doc": "Token-level top-k MoE FFN (Shazeer / Switch / Mixtral).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_experts",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "top_k",
+            "annotation": "int",
+            "default": "2",
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SwitchMoE": {
+        "doc": "Switch-Transformer style MoE: each token visits exactly one expert.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_experts",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      }
+    },
+    "unet_diffusion_blocks": {
+      "SinusoidalTimeEmbedding": {
+        "doc": "Diffusion-style sinusoidal embedding of integer timesteps.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "TimestepMLP": {
+        "doc": "Sinusoidal embedding followed by a 2-layer MLP - used by DDPM/SD.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "DownsampleBlock": {
+        "doc": "Strided 3x3 conv (or avg-pool) for halving spatial size.",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "mode",
+            "annotation": "str",
+            "default": "'conv'",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "UpsampleBlock": {
+        "doc": "Restores spatial resolution via interp / transposed conv / pixel shuffle.",
+        "init": [
+          {
+            "name": "channels",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "mode",
+            "annotation": "str",
+            "default": "'interp'",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "UNetResBlock": {
+        "doc": "Diffusion-style residual block conditioned on a time embedding.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "t_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "UNet": {
+        "doc": "A compact diffusion-style UNet operating on NHWC images.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "base",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "ch_mults",
+            "annotation": "Sequence[int]",
+            "default": "(1, 2, 4, 4)",
+            "kind": "positional"
+          },
+          {
+            "name": "t_dim",
+            "annotation": "int",
+            "default": "256",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "NoisePredictor": {
+        "doc": "Wraps a UNet so it predicts noise ``epsilon_theta(x_t, t, c)``.",
+        "init": [
+          {
+            "name": "backbone",
+            "annotation": "nnx.Module",
+            "default": null,
+            "kind": "positional"
+          }
+        ],
+        "forward_arity": 3
+      },
+      "ZeroConv": {
+        "doc": "1x1 conv initialized to zero - the connector ControlNet uses.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      },
+      "ControlNetBlock": {
+        "doc": "Toy ControlNet hint encoder - encodes a conditioning image and adds via ZeroConv.",
+        "init": [
+          {
+            "name": "hint_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_ch",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": "64",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "LoRALinear": {
+        "doc": "Low-rank adapter for an existing :class:`nnx.Linear`.",
+        "init": [
+          {
+            "name": "base",
+            "annotation": "nnx.Linear",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rank",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "alpha",
+            "annotation": "float",
+            "default": "16.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "LoRAConv2d": {
+        "doc": "LoRA adapter for an :class:`nnx.Conv` (NHWC).",
+        "init": [
+          {
+            "name": "base",
+            "annotation": "nnx.Conv",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rank",
+            "annotation": "int",
+            "default": "4",
+            "kind": "positional"
+          },
+          {
+            "name": "alpha",
+            "annotation": "float",
+            "default": "8.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "HyperNetwork": {
+        "doc": "Small network that generates ``in_dim -> out_dim`` weight matrices on-the-fly.",
+        "init": [
+          {
+            "name": "code_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "in_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "out_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "hidden",
+            "annotation": "int",
+            "default": "128",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "IPAdapterCrossAttention": {
+        "doc": "Two-stream cross-attention: text + image-prompt features (Ye et al. 2023).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "text_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "image_dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": "8",
+            "kind": "positional"
+          },
+          {
+            "name": "scale",
+            "annotation": "float",
+            "default": "1.0",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 3
+      }
+    },
+    "vit_blocks": {
+      "PatchEmbedding": {
+        "doc": "Image -> sequence of patch tokens via a strided conv.",
+        "init": [
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "patch_size",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": "768",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "CLSToken": {
+        "doc": "Learnable [CLS] token prepended to each sequence.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "SwinWindowAttention": {
+        "doc": "Window attention with learned relative-position bias (used inside Swin).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "window",
+            "annotation": "int",
+            "default": "7",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 2
+      },
+      "ShiftedWindowAttention": {
+        "doc": "Cyclic-shift variant enabling cross-window communication (Swin).",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "input_resolution",
+            "annotation": "tuple[int, int]",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "num_heads",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "window",
+            "annotation": "int",
+            "default": "7",
+            "kind": "positional"
+          },
+          {
+            "name": "shift",
+            "annotation": "Optional[int]",
+            "default": "None",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": 1
+      },
+      "MaskedImageModeling": {
+        "doc": "MAE / BEiT-style head: mask a fraction of tokens and reconstruct them.",
+        "init": [
+          {
+            "name": "dim",
+            "annotation": "int",
+            "default": null,
+            "kind": "positional"
+          },
+          {
+            "name": "patch_size",
+            "annotation": "int",
+            "default": "16",
+            "kind": "positional"
+          },
+          {
+            "name": "in_ch",
+            "annotation": "int",
+            "default": "3",
+            "kind": "positional"
+          },
+          {
+            "name": "mask_ratio",
+            "annotation": "float",
+            "default": "0.75",
+            "kind": "positional"
+          },
+          {
+            "name": "rngs",
+            "annotation": "nnx.Rngs",
+            "default": null,
+            "kind": "keyword"
+          }
+        ],
+        "forward_arity": null
+      }
+    }
+  },
+  "index": {
+    "MultiHeadAttention": "attention_blocks",
+    "SelfAttention": "attention_blocks",
+    "CausalSelfAttention": "attention_blocks",
+    "CrossAttention": "attention_blocks",
+    "WindowAttention": "attention_blocks",
+    "LinearAttention": "attention_blocks",
+    "FlashAttention": "attention_blocks",
+    "RotaryEmbedding": "attention_blocks",
+    "RelativePositionBias": "attention_blocks",
+    "AttentionPooling": "attention_blocks",
+    "InceptionBlock": "cnn_vision_blocks",
+    "_DenseLayer": "cnn_vision_blocks",
+    "DenseBlock": "cnn_vision_blocks",
+    "SqueezeExcitation": "cnn_vision_blocks",
+    "CBAM": "cnn_vision_blocks",
+    "SpatialPyramidPooling": "cnn_vision_blocks",
+    "FeaturePyramidNetwork": "cnn_vision_blocks",
+    "ASPP": "cnn_vision_blocks",
+    "PixelShuffleUpsample": "cnn_vision_blocks",
+    "DeformableConv2d": "cnn_vision_blocks",
+    "DeformableAttention": "cnn_vision_blocks",
+    "ConvBlock": "core_blocks",
+    "DepthwiseSeparableConv": "core_blocks",
+    "DilatedConv": "core_blocks",
+    "GroupConv": "core_blocks",
+    "InstanceNorm": "core_blocks",
+    "WeightNorm": "core_blocks",
+    "SpectralNorm": "core_blocks",
+    "AdaIN": "core_blocks",
+    "SPADE": "core_blocks",
+    "_Identity": "core_blocks",
+    "ResidualBlock": "core_blocks",
+    "SkipConnection": "core_blocks",
+    "QuantizedLinearInt8": "efficient_blocks",
+    "QuantizedLinear4bit": "efficient_blocks",
+    "MagnitudePruner": "efficient_blocks",
+    "TokenPruner": "efficient_blocks",
+    "LowRankLinear": "efficient_blocks",
+    "ColumnParallelLinear": "efficient_blocks",
+    "RowParallelLinear": "efficient_blocks",
+    "PipelineStage": "efficient_blocks",
+    "LearnedPositionalEmbedding": "embedding_blocks",
+    "SinusoidalPositionalEmbedding": "embedding_blocks",
+    "ProjectionHead": "embedding_blocks",
+    "CLIPLoss": "embedding_blocks",
+    "EqualLinear": "gan_blocks",
+    "EqualConv2d": "gan_blocks",
+    "GeneratorBlock": "gan_blocks",
+    "DiscriminatorBlock": "gan_blocks",
+    "MappingNetwork": "gan_blocks",
+    "ModulatedConv2d": "gan_blocks",
+    "StyleBlock": "gan_blocks",
+    "MinibatchStdDev": "gan_blocks",
+    "ProgressiveGrowing": "gan_blocks",
+    "VAE": "generative_blocks",
+    "MaskedConv2d": "generative_blocks",
+    "AutoregressiveBlock": "generative_blocks",
+    "AffineCouplingLayer": "generative_blocks",
+    "EnergyBasedModel": "generative_blocks",
+    "DDPMScheduler": "generative_blocks",
+    "DDIMScheduler": "generative_blocks",
+    "MessagePassing": "gnn_blocks",
+    "GraphConv": "gnn_blocks",
+    "GraphAttention": "gnn_blocks",
+    "ExternalMemory": "memory_retrieval_blocks",
+    "VectorStore": "memory_retrieval_blocks",
+    "RAGModule": "memory_retrieval_blocks",
+    "KVCache": "memory_retrieval_blocks",
+    "CLIPEncoder": "multimodal_blocks",
+    "PerceiverResampler": "multimodal_blocks",
+    "QFormer": "multimodal_blocks",
+    "ToolUseBlock": "multimodal_blocks",
+    "MemoryAttention": "multimodal_blocks",
+    "SGDState": "optimization_blocks",
+    "AdamState": "optimization_blocks",
+    "LionState": "optimization_blocks",
+    "SophiaState": "optimization_blocks",
+    "RMSPropState": "optimization_blocks",
+    "EMA": "optimization_blocks",
+    "LossScaler": "optimization_blocks",
+    "_MLP": "rl_blocks",
+    "PolicyNetwork": "rl_blocks",
+    "ValueNetwork": "rl_blocks",
+    "QNetwork": "rl_blocks",
+    "ActorCritic": "rl_blocks",
+    "ReplayBuffer": "rl_blocks",
+    "TargetNetwork": "rl_blocks",
+    "RNNCell": "sequence_blocks",
+    "LSTMCell": "sequence_blocks",
+    "GRUCell": "sequence_blocks",
+    "StateSpaceModel": "sequence_blocks",
+    "MambaBlock": "sequence_blocks",
+    "NeuralODE": "specialized_blocks",
+    "SpectralConv2d": "specialized_blocks",
+    "FNOBlock": "specialized_blocks",
+    "KANLayer": "specialized_blocks",
+    "CapsuleLayer": "specialized_blocks",
+    "SlotAttention": "specialized_blocks",
+    "FeedForward": "transformer_blocks",
+    "SwiGLU": "transformer_blocks",
+    "GEGLU": "transformer_blocks",
+    "TransformerEncoderBlock": "transformer_blocks",
+    "TransformerDecoderBlock": "transformer_blocks",
+    "MixtureOfExperts": "transformer_blocks",
+    "SwitchMoE": "transformer_blocks",
+    "SinusoidalTimeEmbedding": "unet_diffusion_blocks",
+    "TimestepMLP": "unet_diffusion_blocks",
+    "DownsampleBlock": "unet_diffusion_blocks",
+    "UpsampleBlock": "unet_diffusion_blocks",
+    "UNetResBlock": "unet_diffusion_blocks",
+    "UNet": "unet_diffusion_blocks",
+    "NoisePredictor": "unet_diffusion_blocks",
+    "ZeroConv": "unet_diffusion_blocks",
+    "ControlNetBlock": "unet_diffusion_blocks",
+    "LoRALinear": "unet_diffusion_blocks",
+    "LoRAConv2d": "unet_diffusion_blocks",
+    "HyperNetwork": "unet_diffusion_blocks",
+    "IPAdapterCrossAttention": "unet_diffusion_blocks",
+    "PatchEmbedding": "vit_blocks",
+    "CLSToken": "vit_blocks",
+    "SwinWindowAttention": "vit_blocks",
+    "ShiftedWindowAttention": "vit_blocks",
+    "MaskedImageModeling": "vit_blocks"
+  }
+}

@@ -4,6 +4,7 @@ import { toMermaid } from "../generators/mermaid";
 import { toDSL } from "../generators/dsl";
 import { fromJSON, toJSON } from "../generators/json";
 import { fromMermaid } from "../generators/reverseMermaid";
+import { toPyTorch } from "../generators/pytorchCodegen";
 
 const download = (filename: string, contents: string, mime = "text/plain") => {
   const blob = new Blob([contents], { type: mime });
@@ -128,6 +129,18 @@ export default function Toolbar() {
           title="DSL .py — feed back into ../_generate.py --specs"
         >
           Export DSL .py
+        </Btn>
+        <Btn
+          onClick={() => {
+            toPyTorch(meta, nodes, edges)
+              .then((src) =>
+                download(`${stem.toLowerCase()}_model.py`, src, "text/x-python"),
+              )
+              .catch((e) => alert(`PyTorch codegen failed: ${e}`));
+          }}
+          title="Runnable nn.Module backed by RealityShifts/Srivastava-book-of-Blocks"
+        >
+          Export PyTorch
         </Btn>
         <Btn
           kind="danger"
