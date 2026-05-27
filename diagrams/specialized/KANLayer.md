@@ -25,3 +25,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- KAN, KAN 2.0 — symbolic discovery on small AI+Science tasks
+- Hybrid KAN+MLP exploratory architectures
+
+**Tasks**
+
+- Symbolic regression and physics-equation discovery
+- Interpretable function fitting with small, dense datasets
+
+**Common pitfalls**
+
+- Far slower to train than MLPs at comparable expressivity — current limitation.
+- Spline grid extension (refinement) is required for fine-grained accuracy; doing it on the fly is non-trivial.
+- Original promises about scaling laws don't hold at large scale on standard benchmarks — use cautiously for production.
+- Implementation correctness is subtle; pykan is the reference but slow.
+
+**See also**
+
+- [KAN (Liu et al. 2024)](https://arxiv.org/abs/2404.19756)
+- [KAN 2.0 (Liu et al. 2024)](https://arxiv.org/abs/2408.10205)

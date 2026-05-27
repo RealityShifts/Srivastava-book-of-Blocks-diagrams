@@ -16,8 +16,7 @@ A React Flow-based web editor lives in [`editor/`](./editor) — drag from
 a palette of the 10 primitive kinds + all 122 built-in blocks, wire them
 together, get live shape-checking (mismatched edges turn red), then export
 to **Mermaid**, **DSL `.py`** (round-trips through `python _generate.py
---specs ...`), or **Graph JSON**. Use *Import Mermaid* to pull any `.md`
-from [`diagrams/`](./diagrams) straight back onto the canvas.
+--specs ...`), or **Graph JSON**.
 
 ```bash
 cd editor
@@ -25,62 +24,6 @@ npm install
 npm run extract-library   # snapshot blocks/ -> public/library.json
 npm run dev               # http://localhost:5173
 ```
-
-## Reverser: Mermaid → DSL `.py`
-
-[`_reverse.py`](./_reverse.py) inverts the renderer. Point it at any
-generated `.md` (or several) and it emits a drop-in spec that
-`_generate.py --specs ...` re-renders byte-for-byte identically (122/122
-built-ins round-trip exactly). Subgraphs collapse back to a single
-`_ref("Name")`; skip arrows survive as positional skips; per-port shape
-metadata is the only thing lost (it never reaches Mermaid in the first
-place).
-
-```bash
-python _reverse.py diagrams/core/ResidualBlock.md            # writes ResidualBlock_spec.py next to it
-python _reverse.py diagrams/attention/*.md -o attn_spec.py    # bundle a whole category
-python _reverse.py diagrams/core/Linear.md -o -               # stdout
-```
-
-## Codegen: DSL `.py` → runnable PyTorch model
-
-[`_codegen.py`](./_codegen.py) closes the loop: any spec file becomes an
-importable `nn.Module` that binds every `_ref(...)` node to a real class
-in [`RealityShifts/Srivastava-book-of-Blocks`](https://github.com/RealityShifts/Srivastava-book-of-Blocks)
-(`pytorch_blocks.<category>.<ClassName>`).
-
-```bash
-python _codegen.py --specs examples/my_arch.py            # → examples/my_arch_model.py
-python _codegen.py --specs blocks/transformer.py -o -      # stdout
-```
-
-What the codegen does for each block:
-
-* one `nn.Module` subclass whose `__init__` instantiates one attribute
-  per `_ref` node — kwargs are pulled live from the upstream class
-  signature (committed snapshot at
-  [`editor/public/pytorch_blocks.json`](./editor/public/pytorch_blocks.json));
-* a topologically-ordered `forward(...)` whose args are the source IO
-  nodes and which returns the sink IO nodes;
-* inline torch ops for primitives whose label is unambiguous
-  (`+`, `concat`, `ReLU`, `GELU`, `softmax`, …) and `# TODO` lines for
-  free-form labels like `"matmul x · Wᵀ"` that need a real `nn.Linear`.
-
-Required constructor kwargs without defaults are emitted as `...` with a
-one-line `# TODO: set required kwargs [...]` summary so the file parses
-and imports cleanly while making the gaps loud. 121 / 122 built-in block
-names match a class in `pytorch_blocks` (the lone miss is `info_nce`,
-which is a function rather than a `nn.Module`).
-
-To refresh the class snapshot after upstream changes:
-
-```bash
-git clone https://github.com/RealityShifts/Srivastava-book-of-Blocks /tmp/sbob
-python editor/scripts/extract_block_registry.py /tmp/sbob
-```
-
-The editor toolbar's **Export PyTorch** button runs the same logic
-client-side via [`pytorchCodegen.ts`](./editor/src/generators/pytorchCodegen.ts).
 
 ## Where these render
 

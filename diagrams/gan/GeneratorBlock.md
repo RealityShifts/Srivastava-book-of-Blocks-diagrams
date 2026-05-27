@@ -29,3 +29,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DCGAN — original deep convolutional GAN
+- BigGAN, SAGAN — class-conditional image synthesis
+
+**Tasks**
+
+- Upsampling path in convolutional generators
+- Image-to-image translation decoders (CycleGAN, Pix2Pix)
+
+**Common pitfalls**
+
+- Transposed-conv upsample causes checkerboard artefacts — prefer nearest/bilinear + conv.
+- BatchNorm in the generator depends on batch statistics that diverge from real data; consider InstanceNorm or no norm for unconditional GANs.
+- ReLU dying-out problem in small-batch settings — LeakyReLU is safer.
+
+**See also**
+
+- [DCGAN (Radford et al. 2015)](https://arxiv.org/abs/1511.06434)
+- [Checkerboard Artifacts (Odena et al. 2016)](https://distill.pub/2016/deconv-checkerboard/)

@@ -25,3 +25,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- RealNVP / NICE — original normalising flow architectures
+- Glow — invertible image generation
+- Neural Spline Flows, Flow++
+
+**Tasks**
+
+- Exact-likelihood generative modelling
+- Density estimation, variational inference posteriors
+
+**Common pitfalls**
+
+- Determinant of the Jacobian is just `exp(Σ s)` because the lower triangle is identity — lose this property and you lose tractability.
+- Variable splitting (which half is transformed) must alternate across layers; static split leaves half the variables untransformed.
+- Compute / memory both scale O(D) — far less expressive per parameter than autoregressive or diffusion models for images.
+
+**See also**
+
+- [RealNVP (Dinh et al. 2016)](https://arxiv.org/abs/1605.08803)
+- [Glow (Kingma & Dhariwal 2018)](https://arxiv.org/abs/1807.03039)
+- [NICE (Dinh et al. 2014)](https://arxiv.org/abs/1410.8516)

@@ -27,3 +27,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- LLaMA / LLaMA-2 / LLaMA-3 — flagship open-weights LLMs
+- PaLM, Gemma, Mistral, DeepSeek — most modern decoder-only LLMs
+
+**Tasks**
+
+- Replacing the FFN in any Transformer block to get a consistent perplexity win
+- Architectures targeting language modelling and scaling
+
+**Common pitfalls**
+
+- Three linear projections (gate, up, down) — to match a 4D-FFN's parameter count, use inner hidden dim ≈ 8/3·D, NOT 4·D.
+- Custom CUDA kernels for fused SwiGLU exist (xFormers, Triton) — naïve impl is memory-bound and slower than necessary.
+- Gate path needs the same dtype handling as activations — bf16 generally fine, fp16 can underflow at the silu(·).
+
+**See also**
+
+- [GLU Variants Improve Transformer (Shazeer 2020)](https://arxiv.org/abs/2002.05202)
+- [PaLM (Chowdhery et al. 2022)](https://arxiv.org/abs/2204.02311)
+- [LLaMA (Touvron et al. 2023)](https://arxiv.org/abs/2302.13971)

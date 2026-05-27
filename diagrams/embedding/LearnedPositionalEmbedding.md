@@ -25,3 +25,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- BERT, RoBERTa, GPT-2 — original Transformer-era position encoding
+- ViT — learned position embeddings per patch
+
+**Tasks**
+
+- Position injection for fixed-length sequences
+
+**Common pitfalls**
+
+- Cannot extrapolate beyond the training length without interpolation/extension hacks.
+- Adds D × T_max parameters — large at long contexts.
+- Largely replaced by RoPE / ALiBi in modern LLMs for length extrapolation reasons.
+
+**See also**
+
+- [BERT (Devlin et al. 2018)](https://arxiv.org/abs/1810.04805)
+- [ViT (Dosovitskiy et al. 2020)](https://arxiv.org/abs/2010.11929)

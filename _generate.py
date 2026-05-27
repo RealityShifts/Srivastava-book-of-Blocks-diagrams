@@ -77,6 +77,7 @@ from dsl import (  # noqa: F401
     Edge,
     Meta,
     Node,
+    Notes,
     Row,
     Skip,
     Spec,
@@ -90,6 +91,7 @@ from dsl import (  # noqa: F401
     _loss,
     _ref,
     _edge,
+    _notes,
 )
 
 DEFAULT_OUT_SUBDIR = "diagrams"
@@ -145,15 +147,20 @@ def _node_parts(node: Node) -> Tuple[str, str, Meta]:
     return node[0], node[1], node[2]
 
 
-def _spec_unpack(spec: Spec) -> Tuple[str, str, List[Row], Sequence[Skip], Optional[Sequence[Edge]]]:
+def _spec_unpack(
+    spec: Spec,
+) -> Tuple[str, str, List[Row], Sequence[Skip], Optional[Sequence[Edge]], Optional[Notes]]:
     if len(spec) == 3:
         desc, shapes, rows = spec
-        return desc, shapes, rows, (), None
+        return desc, shapes, rows, (), None, None
     if len(spec) == 4:
         desc, shapes, rows, skips = spec
-        return desc, shapes, rows, skips, None
-    desc, shapes, rows, skips, edges = spec
-    return desc, shapes, rows, skips, edges
+        return desc, shapes, rows, skips, None, None
+    if len(spec) == 5:
+        desc, shapes, rows, skips, edges = spec
+        return desc, shapes, rows, skips, edges, None
+    desc, shapes, rows, skips, edges, notes = spec
+    return desc, shapes, rows, skips, edges, notes
 
 
 def _norm_shape(s: Optional[str]) -> Optional[str]:
@@ -223,7 +230,7 @@ def _render_rows(
                 sub = registry[label]
 
             if sub is not None:
-                _, _, sub_rows, sub_skips, sub_edges = _spec_unpack(sub)
+                _, _, sub_rows, sub_skips, sub_edges, _ = _spec_unpack(sub)
                 sub_node_lines, sub_edges_out, sub_slots = _render_rows(
                     sub_rows, sub_skips, sub_edges, registry, max_depth,
                     depth + 1, f"{nid}_", ancestors | {label},
@@ -357,12 +364,53 @@ def render_diagram(
     )
 
 
-def render_markdown(name: str, desc: str, shapes: str, body: str) -> str:
+# Fixed display order for the four named slots of the ``notes`` dict; any
+# other keys render after these in declaration order with their snake_case
+# turned into Title Case headings.
+_NOTES_ORDER: Tuple[str, ...] = ("used_in", "tasks", "pitfalls", "see_also")
+_NOTES_HEADING: Dict[str, str] = {
+    "used_in": "Used in",
+    "tasks": "Tasks",
+    "pitfalls": "Common pitfalls",
+    "see_also": "See also",
+}
+
+
+def _format_notes(notes: Optional[Notes]) -> str:
+    if not notes:
+        return ""
+    keys: List[str] = [k for k in _NOTES_ORDER if notes.get(k)]
+    keys += [k for k in notes if k not in _NOTES_ORDER and notes.get(k)]
+    if not keys:
+        return ""
+    out: List[str] = []
+    for k in keys:
+        heading = _NOTES_HEADING.get(k) or k.replace("_", " ").strip().capitalize()
+        items = notes[k]
+        if not items:
+            continue
+        out.append(f"**{heading}**\n")
+        out.extend(f"- {it}" for it in items)
+        out.append("")  # blank line between sections
+    return "\n".join(out).rstrip() + "\n"
+
+
+def render_markdown(
+    name: str,
+    desc: str,
+    shapes: str,
+    body: str,
+    *,
+    notes: Optional[Notes] = None,
+) -> str:
+    notes_md = _format_notes(notes)
+    tail = f"\n{notes_md}" if notes_md else ""
     return (
         f"# {name}\n\n"
         f"> {desc}\n\n"
         f"**Shapes:** `{shapes}`\n\n"
         f"```mermaid\n{body}\n```\n"
+        f"{tail}"
     )
 
 
@@ -681,7 +729,7 @@ def main() -> None:
         for old in out_dir.glob("*.md"):
             old.unlink()
         for name, spec in blocks.items():
-            desc, shapes, rows, skips, edges = _spec_unpack(spec)
+            desc, shapes, rows, skips, edges, notes = _spec_unpack(spec)
             body = render_diagram(
                 rows, skips, edges,
                 registry=registry,
@@ -690,7 +738,7 @@ def main() -> None:
                 rank_spacing=args.rank_spacing,
                 node_spacing=args.node_spacing,
             )
-            md = render_markdown(name, desc, shapes, body)
+            md = render_markdown(name, desc, shapes, body, notes=notes)
             name_to_path[name].write_text(md)
             total += 1
 

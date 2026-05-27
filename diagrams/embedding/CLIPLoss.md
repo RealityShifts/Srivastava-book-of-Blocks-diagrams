@@ -29,3 +29,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- CLIP (Radford et al. 2021) — 400M image-text pair pre-training
+- OpenCLIP, LAION CLIP releases (DataComp, MetaCLIP)
+- SigLIP — sigmoid-loss replacement
+
+**Tasks**
+
+- Image-text retrieval, zero-shot classification
+- Foundation embeddings for downstream vision-language models
+
+**Common pitfalls**
+
+- Effective batch size dominates quality — smaller batches need gradient accumulation OR switch to SigLIP (per-pair sigmoid, batch-size agnostic).
+- τ (logit scale) is learned but clamped — uncapped τ blows up gradients.
+- Symmetric loss = (rows + cols) / 2 — applying only one direction halves the signal.
+- Within-batch duplicates / near-duplicates poison the contrastive loss.
+
+**See also**
+
+- [CLIP (Radford et al. 2021)](https://arxiv.org/abs/2103.00020)
+- [SigLIP (Zhai et al. 2023)](https://arxiv.org/abs/2303.15343)

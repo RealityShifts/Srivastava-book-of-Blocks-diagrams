@@ -27,3 +27,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- ViT, DeiT, BEiT, DINO — all standard image transformers
+- Stable Diffusion latent ViT components
+- Video / 3D transformers (3D conv kernel for patch-time tokens)
+
+**Tasks**
+
+- Converting an image into a sequence for a Transformer
+- Adjustable trade-off between spatial detail and sequence length via patch size
+
+**Common pitfalls**
+
+- Patch size p must divide H and W exactly; resize or pad first.
+- Smaller p quadratically increases compute (more tokens, more attention).
+- Pretrained ViT checkpoints lock in p — fine-tuning at a different resolution needs position-embedding interpolation.
+
+**See also**
+
+- [ViT (Dosovitskiy et al. 2020)](https://arxiv.org/abs/2010.11929)
+- [DeiT (Touvron et al. 2020)](https://arxiv.org/abs/2012.12877)

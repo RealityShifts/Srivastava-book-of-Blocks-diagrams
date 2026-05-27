@@ -39,3 +39,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DeepLab v2 / v3 / v3+ semantic segmentation
+- Real-time segmentation models that need large receptive field at low compute
+
+**Tasks**
+
+- Dense scene parsing where small AND huge objects coexist
+- Multi-scale context aggregation without down-sampling the feature map
+
+**Common pitfalls**
+
+- Dilation rates must be tuned to output stride — 6/12/18 are for OS=16; halve them for OS=8.
+- Gridding artefacts when dilation grows quickly — visualise the receptive-field overlap.
+- Image-level pooling branch needs careful upsampling back to feature-map size.
+
+**See also**
+
+- [DeepLab v3 (Chen et al. 2017)](https://arxiv.org/abs/1706.05587)
+- [DeepLab v3+ (Chen et al. 2018)](https://arxiv.org/abs/1802.02611)

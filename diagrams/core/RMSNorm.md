@@ -27,3 +27,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- LLaMA / LLaMA-2 / LLaMA-3 — standard pre-norm
+- T5 v1.1, Gemma, Mistral, Qwen — most modern LLMs
+- Diffusion transformers (DiT) and audio models
+
+**Tasks**
+
+- Drop-in LayerNorm replacement with ~10–15 % faster forward at no quality cost
+- Pre-normalisation in deep transformer stacks
+
+**Common pitfalls**
+
+- Skips the mean-subtraction — won't help on inputs with strong DC bias.
+- ε placement (inside vs outside the sqrt) differs across implementations; match the convention of the checkpoint you're loading or fine-tuning.
+- No `bias` parameter — don't try to load a LayerNorm checkpoint into RMSNorm naïvely.
+
+**See also**
+
+- [RMSNorm (Zhang & Sennrich 2019)](https://arxiv.org/abs/1910.07467)
+- [LLaMA (Touvron et al. 2023)](https://arxiv.org/abs/2302.13971)

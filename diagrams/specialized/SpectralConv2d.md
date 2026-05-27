@@ -27,3 +27,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Fourier Neural Operator (FNO) — Navier-Stokes, Darcy flow
+- GNOT / NeuralOperator library — generalised operators
+- Weather forecasting (FourCastNet, GraphCast hybrids)
+
+**Tasks**
+
+- Learning solution operators for PDEs (input → solution map)
+- Discretisation-invariant inference — train at one grid, evaluate at another
+
+**Common pitfalls**
+
+- Truncating to `mode` low frequencies loses sharp features — too few modes, blurry outputs.
+- Complex-valued weights are needed; real-valued FFT representations sometimes confuse naïve PyTorch users.
+- Boundary conditions matter — periodic-only is a strong restriction for non-periodic PDEs.
+
+**See also**
+
+- [FNO (Li et al. 2020)](https://arxiv.org/abs/2010.08895)
+- [FourCastNet (Pathak et al. 2022)](https://arxiv.org/abs/2202.11214)

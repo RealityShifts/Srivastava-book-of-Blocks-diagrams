@@ -27,3 +27,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Swin Transformer v1 / v2 — image classification, detection, segmentation backbones
+- VideoSwin, Swin-Unet for medical segmentation
+
+**Tasks**
+
+- Hierarchical vision backbones where global self-attention would be infeasible
+- Dense prediction tasks needing high-resolution feature maps
+
+**Common pitfalls**
+
+- On its own, no information crosses windows — must alternate with a shifted variant.
+- Image H, W must be divisible by the window size; pad and crop carefully.
+- Relative position bias table grows as (2w−1)² — large windows blow up parameters fast.
+
+**See also**
+
+- [Swin Transformer (Liu et al. 2021)](https://arxiv.org/abs/2103.14030)
+- [Swin v2 (Liu et al. 2021)](https://arxiv.org/abs/2111.09883)

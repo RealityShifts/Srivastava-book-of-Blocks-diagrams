@@ -29,3 +29,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Slot Attention (Locatello et al. 2020)
+- OSRT / SAVi for video object discovery
+- Object-centric world models in RL
+
+**Tasks**
+
+- Unsupervised object discovery / instance segmentation
+- Compositional scene representations from images / videos
+
+**Common pitfalls**
+
+- Number of slots K is a strong inductive bias — fewer than objects merges, more leaves slots empty.
+- Slot symmetry-breaking is induced by random init each forward — beware deterministic fixes that collapse all slots.
+- Softmax over slots (competition) is essential — without it, all slots converge to the same content.
+- Works on small / synthetic scenes; transfer to realistic images is an active research area.
+
+**See also**
+
+- [Slot Attention (Locatello et al. 2020)](https://arxiv.org/abs/2006.15055)
+- [SAVi (Kipf et al. 2021)](https://arxiv.org/abs/2111.12594)

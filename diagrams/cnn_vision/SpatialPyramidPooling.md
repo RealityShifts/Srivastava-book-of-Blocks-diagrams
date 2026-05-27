@@ -31,3 +31,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- SPP-Net (He et al. 2014) — variable-size input → fixed feature for FC head
+- Fast R-CNN's RoI pooling is a per-region SPP
+- YOLOv3/v4 SPP module (max-pool variant) in the head
+
+**Tasks**
+
+- Decoupling input resolution from a final fixed-size MLP classifier
+- Multi-scale global context aggregation
+
+**Common pitfalls**
+
+- If bin counts are large the flattened feature explodes — use small (1, 2, 3) or (1, 2, 4).
+- Max-pool vs avg-pool changes behaviour — YOLO uses max for sharpness; classification tends to use avg.
+
+**See also**
+
+- [SPP-Net (He et al. 2014)](https://arxiv.org/abs/1406.4729)
+- [Fast R-CNN (Girshick 2015)](https://arxiv.org/abs/1504.08083)

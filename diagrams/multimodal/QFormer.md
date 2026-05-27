@@ -31,3 +31,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- BLIP-2 — bridges frozen ViT and frozen LLM
+- InstructBLIP, MiniGPT-4 (early versions)
+- X-InstructBLIP for multimodal instruction tuning
+
+**Tasks**
+
+- Connecting a frozen vision encoder to a frozen LLM with minimal trainable parameters
+- Cross-modal alignment via a learnable bottleneck of Q queries
+
+**Common pitfalls**
+
+- Q ≈ 32 queries is the BLIP-2 default — fewer harms downstream tasks.
+- Two-stage training (contrastive then generative) is necessary; skipping the contrastive stage degrades alignment.
+- Q-Former is small (~188M) but the vision and LM stacks aren't — most inference cost is elsewhere.
+- Mostly superseded by simpler linear-projector designs (LLaVA, Idefics-3) for new builds.
+
+**See also**
+
+- [BLIP-2 (Li et al. 2023)](https://arxiv.org/abs/2301.12597)
+- [InstructBLIP (Dai et al. 2023)](https://arxiv.org/abs/2305.06500)
+- [LLaVA (Liu et al. 2023)](https://arxiv.org/abs/2304.08485)

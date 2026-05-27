@@ -25,3 +25,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Memorizing Transformers (Wu et al. 2022) — kNN-augmented attention
+- Retro / Retro-fitted models
+- Agentic memory layers (long-term episodic memory)
+
+**Tasks**
+
+- Extending effective context via retrieval-as-attention
+- Personalisation by storing user-specific tokens in memory
+
+**Common pitfalls**
+
+- Memory bank size grows over time — needs eviction or summarisation.
+- Approximate kNN (top-k) over memory is essential for scale; exhaustive dot-product is infeasible past ~10⁶ items.
+- Training distribution and memory distribution can diverge — periodic refresh helps.
+
+**See also**
+
+- [Memorizing Transformers (Wu et al. 2022)](https://arxiv.org/abs/2203.08913)
+- [kNN-LM (Khandelwal et al. 2019)](https://arxiv.org/abs/1911.00172)

@@ -36,3 +36,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- ResNet-18/34/50/101/152 — the most-cited deep-learning architecture
+- U-Net diffusion noise prediction backbone
+- AlphaGo / AlphaZero policy-value tower
+- Almost every modern CNN backbone (ConvNeXt, RegNet)
+
+**Tasks**
+
+- Enabling depth > 30 layers without vanishing gradients
+- Optimisation landscape smoothing — skips create much shorter back-prop paths
+
+**Common pitfalls**
+
+- Pre-activation order (BN → ReLU → Conv) often trains deeper nets more stably than post-act.
+- When channel count changes across the skip, you need a 1×1 projection or zero-pad — naïve add will dimension-error.
+- ReLU AFTER the add caps activations to ≥ 0, which can hurt; SiLU/GELU is sometimes better.
+
+**See also**
+
+- [ResNet (He et al. 2015)](https://arxiv.org/abs/1512.03385)
+- [Pre-activation ResNet (He et al. 2016)](https://arxiv.org/abs/1603.05027)
+- [Identity Mappings paper analysis](https://arxiv.org/abs/1603.05027)

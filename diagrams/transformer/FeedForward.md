@@ -27,3 +27,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Every Transformer block ever — the 'MLP' or 'FFN' sub-layer
+- BERT, GPT, T5, ViT, Whisper — r is typically 4
+
+**Tasks**
+
+- Per-token non-linear transformation (the 'thinking' between attention layers)
+- Where most parameters of a Transformer live (~2/3 of total)
+
+**Common pitfalls**
+
+- Activation choice matters a lot at scale — GELU > ReLU; gated variants (SwiGLU/GEGLU) further improve language modelling.
+- Inner ratio r=4 is convention, not a constant — Chinchilla-scaled models sometimes use r=3 (SwiGLU) or 8/3 (LLaMA) to keep param count comparable.
+- FFN dominates compute on short sequences (T < D); fuse with the next attention LN where possible.
+
+**See also**
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)
+- [GLU Variants (Shazeer 2020)](https://arxiv.org/abs/2002.05202)

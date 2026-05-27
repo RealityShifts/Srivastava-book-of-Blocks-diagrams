@@ -42,6 +42,16 @@ _TITLE = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
 _DESC = re.compile(r"^>\s+(.+?)\s*$", re.MULTILINE)
 _SHAPES = re.compile(r"^\*\*Shapes:\*\*\s+`(.+?)`\s*$", re.MULTILINE)
 
+# Notes sections that ``render_markdown`` emits below the diagram. We map the
+# heading text back to the same snake_case key the spec author used so the
+# emitted DSL is symmetric with what was written by hand.
+_NOTES_HEADING_TO_KEY = {
+    "Used in": "used_in",
+    "Tasks": "tasks",
+    "Common pitfalls": "pitfalls",
+    "See also": "see_also",
+}
+
 
 def _frontmatter(text: str) -> Tuple[str, str, str]:
     title = _TITLE.search(text)
@@ -52,6 +62,33 @@ def _frontmatter(text: str) -> Tuple[str, str, str]:
         (desc.group(1) if desc else "Reversed from a Mermaid diagram."),
         (shapes.group(1) if shapes else "(*) → (*)"),
     )
+
+
+def _parse_notes(text: str) -> Dict[str, List[str]]:
+    """Pull the bullet-listed sections that appear *after* the mermaid fence
+    back into the snake_case dict the spec carries. Unknown headings are
+    preserved with ``heading.lower().replace(' ', '_')`` keys.
+    """
+    fence_end = text.rfind("```")
+    tail = text[fence_end + 3:] if fence_end != -1 else text
+    notes: "Dict[str, List[str]]" = {}
+    current: Optional[str] = None
+    for raw in tail.splitlines():
+        line = raw.rstrip()
+        m = re.match(r"^\*\*(.+?)\*\*\s*$", line)
+        if m:
+            heading = m.group(1).strip()
+            key = _NOTES_HEADING_TO_KEY.get(heading) or heading.lower().replace(" ", "_")
+            current = key
+            notes.setdefault(current, [])
+            continue
+        if current is None:
+            continue
+        bm = re.match(r"^-\s+(.+)$", line)
+        if bm:
+            notes[current].append(bm.group(1).strip())
+    # Drop sections that ended up empty (e.g. stray ``**Foo**`` with no bullets).
+    return {k: v for k, v in notes.items() if v}
 
 
 def _mermaid_body(text: str) -> str:
@@ -219,7 +256,26 @@ def _emit_node(kind: str, label: str, uid: str) -> str:
     return f'{fn}({_py_str(label)}, id={_py_str(uid)})'
 
 
-def _block_to_spec(parsed: Parsed, desc: str, shapes: str) -> str:
+def _emit_notes(notes: Dict[str, List[str]]) -> str:
+    if not notes:
+        return ""
+    parts: List[str] = []
+    for key, items in notes.items():
+        body = ",\n".join(f"                {_py_str(it)}" for it in items)
+        parts.append(f"                {key}=[\n{body}\n                ]")
+    return (
+        "            _notes(\n"
+        + ",\n".join(parts)
+        + "\n            )"
+    )
+
+
+def _block_to_spec(
+    parsed: Parsed,
+    desc: str,
+    shapes: str,
+    notes: Optional[Dict[str, List[str]]] = None,
+) -> str:
     rows = _layer(parsed)
 
     uid_of: Dict[str, str] = {}
@@ -258,6 +314,12 @@ def _block_to_spec(parsed: Parsed, desc: str, shapes: str) -> str:
             edges_lines.append(f'            _edge({_py_str(s)}, {_py_str(t)})')
     edges_body = ",\n".join(edges_lines)
 
+    # The 5th slot must be ``None`` (not ``[]``) when we want auto-wiring; the
+    # reverser already collects every solid edge explicitly above so we *do*
+    # want the explicit list. Leaving it as ``[...]`` is correct here.
+    notes_emit = _emit_notes(notes or {})
+    notes_line = f"            {notes_emit[12:]},\n" if notes_emit else ""
+
     return (
         "        (\n"
         f"            {_py_str(desc)},\n"
@@ -270,7 +332,8 @@ def _block_to_spec(parsed: Parsed, desc: str, shapes: str) -> str:
         + edges_body
         + ("\n" if edges_body else "")
         + "            ],\n"
-        "        )"
+        + notes_line
+        + "        )"
     )
 
 
@@ -280,7 +343,8 @@ def reverse_file(path: Path) -> Tuple[str, str]:
     name, desc, shapes = _frontmatter(text)
     body = _mermaid_body(text)
     parsed = _parse_body(body)
-    spec = _block_to_spec(parsed, desc, shapes)
+    notes = _parse_notes(text)
+    spec = _block_to_spec(parsed, desc, shapes, notes=notes)
     return name, spec
 
 
@@ -301,7 +365,7 @@ def emit_module(
         "original .md inputs (per-port shape metadata is lossy through\n"
         "Mermaid and is not recovered).\n"
         '"""\n\n'
-        "from _generate import _io, _op, _norm, _act, _attn, _merge, _emb, _loss, _ref, _edge  # noqa: F401\n\n"
+        "from _generate import _io, _op, _norm, _act, _attn, _merge, _emb, _loss, _ref, _edge, _notes  # noqa: F401\n\n"
         f"CATEGORY = {_py_str(category)}\n"
         f"CATEGORY_DESC = {_py_str(category_desc)}\n\n"
         "BLOCKS = {\n"

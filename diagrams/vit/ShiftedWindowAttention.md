@@ -31,3 +31,22 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Swin Transformer's odd-numbered blocks (SW-MSA after W-MSA)
+- Hybrid CNN-transformer detectors using Swin as backbone
+
+**Tasks**
+
+- Letting adjacent windows exchange tokens without paying global-attention cost
+
+**Common pitfalls**
+
+- The shift mask is non-trivial — getting the connectivity wrong silently halves quality.
+- Cyclic shift must be exactly undone after attention; off-by-one rolls leak features.
+- Combine carefully with relative position bias — shift changes which (i,j) pairs are valid.
+
+**See also**
+
+- [Swin Transformer (Liu et al. 2021)](https://arxiv.org/abs/2103.14030)

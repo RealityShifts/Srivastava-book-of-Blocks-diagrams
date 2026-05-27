@@ -27,3 +27,29 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Original RAG (Lewis et al. 2020) for open-domain QA
+- REALM, RETRO — retrieval baked into pretraining
+- ChatGPT-with-tools, Perplexity, Bing Copilot — production RAG
+- LangChain / LlamaIndex / Haystack pipelines
+
+**Tasks**
+
+- Open-domain question answering with up-to-date knowledge
+- Reducing hallucination in LLMs by grounding in retrieved documents
+- Domain-specific assistants (legal, medical, code)
+
+**Common pitfalls**
+
+- Retrieval quality dominates downstream LM quality — invest in the encoder / reranker.
+- Top-k too large dilutes attention; too small misses the answer.
+- Stale embedding model + fresh documents = recall collapse — re-embed on drift.
+- Chunking strategy (sentence vs paragraph vs sliding window) materially changes recall.
+
+**See also**
+
+- [RAG (Lewis et al. 2020)](https://arxiv.org/abs/2005.11401)
+- [REALM (Guu et al. 2020)](https://arxiv.org/abs/2002.08909)
+- [RETRO (Borgeaud et al. 2021)](https://arxiv.org/abs/2112.04426)

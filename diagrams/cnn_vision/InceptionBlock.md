@@ -34,3 +34,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- GoogLeNet (Inception v1) ILSVRC-2014 winner
+- Inception v2/v3/v4, Inception-ResNet
+- Xception (later replaced concat-of-branches by depthwise separable)
+
+**Tasks**
+
+- Image classification backbones
+- Capturing features at multiple receptive fields without enumerating depths
+
+**Common pitfalls**
+
+- 1×1 bottlenecks before 3×3 / 5×5 are essential — without them the branch is FLOP-explosive.
+- Channel concatenation grows downstream input channels — plan the next block's compute.
+- Mostly superseded by ResNet-style depth + width scaling; Inception is rare in 2020s arch.
+
+**See also**
+
+- [GoogLeNet (Szegedy et al. 2014)](https://arxiv.org/abs/1409.4842)
+- [Inception v3 (Szegedy et al. 2015)](https://arxiv.org/abs/1512.00567)
+- [Xception (Chollet 2017)](https://arxiv.org/abs/1610.02357)

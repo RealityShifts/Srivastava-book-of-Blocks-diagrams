@@ -43,3 +43,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Original U-Net for biomedical segmentation (Ronneberger 2015)
+- DDPM / Stable Diffusion / Imagen noise prediction
+- nnU-Net — semi-automated medical segmentation
+
+**Tasks**
+
+- Diffusion-model noise prediction
+- Dense prediction (segmentation, depth, optical flow)
+
+**Common pitfalls**
+
+- Skip channel counts must match decoder side — channel-list mismatch errors are common.
+- Bottleneck attention costs O((H·W)²) — fine at 16×16 latents, infeasible at 64×64 pixels.
+- Diffusion U-Nets are huge (~860M for SD 1.5) — memory-bound; gradient checkpointing helps.
+
+**See also**
+
+- [U-Net (Ronneberger et al. 2015)](https://arxiv.org/abs/1505.04597)
+- [DDPM (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)
+- [Stable Diffusion (Rombach et al. 2021)](https://arxiv.org/abs/2112.10752)

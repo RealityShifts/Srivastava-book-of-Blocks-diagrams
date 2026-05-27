@@ -25,3 +25,21 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- U-Net decoders in diffusion models, segmentation
+- Super-resolution and image-to-image networks
+
+**Tasks**
+
+- Doubling spatial size while smoothing aliasing introduced by nearest-up
+
+**Common pitfalls**
+
+- Transposed-conv alternatives cause checkerboard artefacts — nearest+conv is safer.
+- Bilinear can be smoother than nearest but trades sharpness; pick per task.
+
+**See also**
+
+- [Checkerboard Artifacts (Odena et al. 2016)](https://distill.pub/2016/deconv-checkerboard/)

@@ -27,3 +27,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Swin Transformer v1 / v2 backbones
+- Mask2Former, SwinUNETR (medical) detection / segmentation heads
+
+**Tasks**
+
+- Hierarchical vision backbones that scale to detection / segmentation resolutions
+- Replacing global attention when O(N²) is infeasible
+
+**Common pitfalls**
+
+- Each window is independent — must alternate with a shifted-window block to mix.
+- Relative position bias table has shape (2w−1)², becomes large for big windows.
+- Inputs must be padded so H, W are multiples of the window size.
+
+**See also**
+
+- [Swin Transformer (Liu et al. 2021)](https://arxiv.org/abs/2103.14030)
+- [Swin v2 (Liu et al. 2021)](https://arxiv.org/abs/2111.09883)

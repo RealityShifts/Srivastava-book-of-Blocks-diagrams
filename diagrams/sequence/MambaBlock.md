@@ -34,3 +34,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Mamba / Mamba-2 — language modelling at 3B+ scale
+- Vision Mamba (ViM, VMamba), MedMamba for medical imaging
+- Audio / DNA / time-series with very long context
+
+**Tasks**
+
+- Linear-time alternative to Transformers for million-token contexts
+- Streaming inference (constant-memory state)
+
+**Common pitfalls**
+
+- Selective scan needs a custom CUDA kernel for any reasonable speed (built into mamba-ssm).
+- Selective parameters Δ, B, C must be input-DEPENDENT for the language-modelling win — passing constants degrades to S4 performance.
+- Bf16 training is fine; fp16 sometimes needs careful loss scaling.
+- No proven scaling law parity with Transformers yet — verify on YOUR distribution.
+
+**See also**
+
+- [Mamba (Gu & Dao 2023)](https://arxiv.org/abs/2312.00752)
+- [Mamba-2 (Dao & Gu 2024)](https://arxiv.org/abs/2405.21060)

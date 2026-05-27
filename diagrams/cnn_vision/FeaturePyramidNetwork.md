@@ -27,3 +27,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Faster R-CNN with FPN, Mask R-CNN — gold standard detection necks
+- RetinaNet (FPN + Focal Loss)
+- Panoptic-FPN, PointRend
+
+**Tasks**
+
+- Multi-scale object detection / segmentation
+- Any dense-prediction task where small AND large objects must be recovered
+
+**Common pitfalls**
+
+- All FPN levels must have the SAME channel count for the top-down add to work (commonly 256).
+- Aliasing from naïve nearest-upsample — the 3×3 smooth conv after the add is not optional.
+- PAN-FPN, BiFPN add bottom-up paths — often a free accuracy gain for detection.
+
+**See also**
+
+- [FPN (Lin et al. 2016)](https://arxiv.org/abs/1612.03144)
+- [PANet (Liu et al. 2018)](https://arxiv.org/abs/1803.01534)
+- [BiFPN / EfficientDet (Tan et al. 2019)](https://arxiv.org/abs/1911.09070)

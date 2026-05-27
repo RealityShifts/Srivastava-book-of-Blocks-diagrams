@@ -27,3 +27,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Megatron-LM tensor parallelism (TP) for LLM training
+- DeepSpeed, FasterTransformer, vLLM TP for inference
+
+**Tasks**
+
+- Sharding the Q/K/V/O linears of a Transformer across N GPUs
+- Fitting layers that don't fit in a single GPU's memory
+
+**Common pitfalls**
+
+- Pair with RowParallelLinear immediately after (Q→attn→O) so the all-gather and all-reduce cancel out — Megatron's clever design.
+- Bias is duplicated across ranks by default — be careful with weight decay accounting.
+- Sequence-parallel variant reduces activation memory by another factor of N.
+
+**See also**
+
+- [Megatron-LM (Shoeybi et al. 2019)](https://arxiv.org/abs/1909.08053)

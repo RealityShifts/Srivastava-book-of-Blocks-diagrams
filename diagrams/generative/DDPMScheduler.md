@@ -27,3 +27,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DDPM / DDIM training-time noising
+- Stable Diffusion 1.5 / 2.x default scheduler
+- Improved-DDPM, EDM, Karras schedule
+
+**Tasks**
+
+- Adding noise during training to teach the denoiser
+- Defining the SDE / discrete chain that the model inverts at sampling time
+
+**Common pitfalls**
+
+- β schedule choice (linear, cosine, sigmoid) materially changes sample quality.
+- Numerical stability for very large t — keep α̅_t in fp32.
+- Sampling-time scheduler must match the noise schedule used at training.
+
+**See also**
+
+- [DDPM (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)
+- [Improved DDPM (Nichol & Dhariwal 2021)](https://arxiv.org/abs/2102.09672)
+- [EDM (Karras et al. 2022)](https://arxiv.org/abs/2206.00364)

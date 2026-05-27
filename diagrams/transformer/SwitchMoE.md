@@ -33,3 +33,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Switch Transformer — the original top-1 routing design (Fedus et al. 2021)
+- Many production MoE LLMs default to top-1 routing for inference simplicity
+
+**Tasks**
+
+- Maximum-throughput MoE training at trillion-parameter scale
+- Sparse fine-tuning where compute budget per token is fixed
+
+**Common pitfalls**
+
+- Routing collapse risk is HIGHER than top-2 — must enforce expert capacity and z-loss for stability.
+- Top-1 routing is non-differentiable in the argmax — gradient flows via the router logits scaling the expert output (straight-through estimator).
+- Dropped tokens (over capacity) silently become zeros — keep an eye on the drop rate.
+
+**See also**
+
+- [Switch Transformer (Fedus et al. 2021)](https://arxiv.org/abs/2101.03961)

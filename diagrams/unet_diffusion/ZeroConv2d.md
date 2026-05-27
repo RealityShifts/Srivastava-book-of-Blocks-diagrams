@@ -23,3 +23,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- ControlNet — bridge between trainable copy and frozen U-Net
+- AdaLN-Zero / DiT — adaptive layer norm initialised to identity
+
+**Tasks**
+
+- Safely adding a new branch to a pretrained model without breaking its outputs at init
+- Smooth transfer learning where the new module starts as a no-op
+
+**Common pitfalls**
+
+- Zero init kills gradients to the input — only the conv WEIGHTS get updated, not earlier params.
+- Use only at the JUNCTION between trained and frozen networks; cascading zero-convs back-to-back breaks training.
+
+**See also**
+
+- [ControlNet (Zhang et al. 2023)](https://arxiv.org/abs/2302.05543)
+- [DiT (Peebles & Xie 2022)](https://arxiv.org/abs/2212.09748)

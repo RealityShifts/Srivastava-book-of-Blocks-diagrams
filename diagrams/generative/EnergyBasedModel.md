@@ -23,3 +23,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Implicit Generation (Du & Mordatch 2019)
+- JEM — joint generative-discriminative training
+- Score-based models (gradient of log-density ≈ −∇E)
+
+**Tasks**
+
+- Density modelling without a tractable partition function
+- Out-of-distribution detection (low energy = in-distribution)
+
+**Common pitfalls**
+
+- Training is unstable — contrastive divergence and short-run MCMC are common workarounds.
+- Sampling needs Langevin dynamics or HMC — slow compared to feed-forward generators.
+- Mode coverage is poor without replay buffers and persistent chains.
+
+**See also**
+
+- [Implicit Generation (Du & Mordatch 2019)](https://arxiv.org/abs/1903.08689)
+- [JEM (Grathwohl et al. 2019)](https://arxiv.org/abs/1912.03263)
+- [A Tutorial on EBMs (LeCun et al. 2006)](http://yann.lecun.com/exdb/publis/pdf/lecun-06.pdf)

@@ -27,3 +27,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- S4 (Gu et al. 2021) — first SSM to beat Transformers on Long Range Arena
+- S5, H3, Hyena — variants exploring kernels and gating
+- Backbone for Mamba's selective SSM
+
+**Tasks**
+
+- Very long-range sequence modelling (Path-X, audio, DNA)
+- Tasks where memory must remain constant w.r.t. sequence length at inference
+
+**Common pitfalls**
+
+- HiPPO initialisation of A is critical — random init is far worse.
+- Numerical stability of the discretisation (ZOH vs bilinear) affects training.
+- Linear SSMs lack content-based gating — outperformed by Mamba on language tasks.
+- FFT-based parallel scan is fast for inference but needs careful padding.
+
+**See also**
+
+- [S4 / HiPPO (Gu et al. 2021)](https://arxiv.org/abs/2111.00396)
+- [S5 (Smith et al. 2022)](https://arxiv.org/abs/2208.04933)
+- [H3 (Fu et al. 2022)](https://arxiv.org/abs/2212.14052)

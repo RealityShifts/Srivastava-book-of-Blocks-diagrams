@@ -26,3 +26,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Transformer pre-norm / post-norm residuals (Attention is All You Need)
+- U-Net long skips between matched-resolution encoder and decoder
+- Highway networks and HighwayLSTM predecessors of ResNet
+
+**Tasks**
+
+- Gradient highway in deep networks — every skip shortens back-prop by a layer
+- Preserving low-level information past depth (segmentation, super-resolution)
+
+**Common pitfalls**
+
+- Variance grows with depth if skips aren't scaled — pre-norm or √-scaling addresses this.
+- Skips across different shapes need a 1×1 projection (channel) or interpolation (spatial).
+- Without an activation after the add, two consecutive residuals collapse into one linear map for the gradient.
+
+**See also**
+
+- [Highway Networks (Srivastava et al. 2015)](https://arxiv.org/abs/1505.00387)
+- [ResNet (He et al. 2015)](https://arxiv.org/abs/1512.03385)
+- [U-Net (Ronneberger et al. 2015)](https://arxiv.org/abs/1505.04597)

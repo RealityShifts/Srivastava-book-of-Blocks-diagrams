@@ -33,3 +33,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Toolformer — LM learns when to call APIs via self-supervised tags
+- Gorilla, ToolLLM — tool-use fine-tuning of open LLMs
+- OpenAI function calling / Anthropic tool use APIs (in spirit)
+- ReAct / MRKL agent patterns
+
+**Tasks**
+
+- Agentic LLMs that delegate sub-tasks to calculators, search, code interpreters
+- Modular pipelines that compose deterministic tools with neural reasoning
+
+**Common pitfalls**
+
+- Soft routing rarely beats hard selection in deployed systems — most production agents do hard calls with thresholding.
+- Tool latency dominates end-to-end response time; pipeline parallelism helps.
+- Error propagation: failed tool returns must be turned into tokens the LM can correct from.
+
+**See also**
+
+- [Toolformer (Schick et al. 2023)](https://arxiv.org/abs/2302.04761)
+- [ReAct (Yao et al. 2022)](https://arxiv.org/abs/2210.03629)
+- [Gorilla (Patil et al. 2023)](https://arxiv.org/abs/2305.15334)

@@ -73,3 +73,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Original Transformer / Marian NMT
+- T5, BART, Pegasus — sequence-to-sequence pre-training
+- Whisper decoder, audio-to-text translation
+
+**Tasks**
+
+- Machine translation, summarisation, text generation conditioned on encoder context
+- Cross-modal generation (image-to-text, audio-to-text)
+
+**Common pitfalls**
+
+- Three residuals per block — order is causal-self / cross / FFN; reordering changes what the model can attend to.
+- Cross-attention K/V come from a frozen encoder during inference — cache them once.
+- Causal mask applies to self-attn only; cross-attn must remain unmasked over context.
+
+**See also**
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)
+- [BART (Lewis et al. 2019)](https://arxiv.org/abs/1910.13461)
+- [T5 (Raffel et al. 2020)](https://arxiv.org/abs/1910.10683)

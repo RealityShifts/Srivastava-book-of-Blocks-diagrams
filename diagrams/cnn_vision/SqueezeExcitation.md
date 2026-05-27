@@ -34,3 +34,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- SENet — ILSVRC-2017 winner
+- MobileNet-V3, EfficientNet-B0..B7 — SE is built into every block
+- Detection / segmentation backbones (e.g. SE-ResNeXt)
+
+**Tasks**
+
+- Cheap channel re-calibration for almost any CNN
+- Adding channel-wise attention without significant FLOP cost (~< 1%)
+
+**Common pitfalls**
+
+- Reduction ratio r is a sensitive hyperparameter — too small kills capacity, too large is wasteful.
+- Sigmoid output multiplied by x can saturate gradients in deep stacks; modern variants use hard-sigmoid for mobile.
+- Adds latency on memory-bound hardware despite tiny FLOPs.
+
+**See also**
+
+- [Squeeze-and-Excitation Networks (Hu et al. 2017)](https://arxiv.org/abs/1709.01507)
+- [EfficientNet (Tan & Le 2019)](https://arxiv.org/abs/1905.11946)

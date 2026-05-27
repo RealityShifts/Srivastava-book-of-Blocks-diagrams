@@ -25,3 +25,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- GPipe — micro-batched pipeline
+- PipeDream / Megatron-LM 1F1B — interleaved schedule
+- Production LLM training on >100 GPUs
+
+**Tasks**
+
+- Scaling beyond a single tensor-parallel group
+- Training models too large to fit on TP alone (combining PP × TP × DP × ZeRO)
+
+**Common pitfalls**
+
+- Pipeline bubbles — first and last microbatches see idle GPUs; smaller microbatches help.
+- Activation memory grows with number of in-flight microbatches; 1F1B keeps it bounded.
+- Pipeline stages must be balanced in compute; an imbalance bottlenecks the whole pipe.
+- Send/recv ordering bugs cause silent hangs that look like NCCL timeouts.
+
+**See also**
+
+- [GPipe (Huang et al. 2018)](https://arxiv.org/abs/1811.06965)
+- [PipeDream (Narayanan et al. 2018)](https://arxiv.org/abs/1806.03377)
+- [Megatron-LM scheduling (Narayanan et al. 2021)](https://arxiv.org/abs/2104.04473)

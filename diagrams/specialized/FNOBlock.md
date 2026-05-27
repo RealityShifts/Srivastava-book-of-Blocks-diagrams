@@ -40,3 +40,22 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- FNO scientific-ML stacks
+- AFNO (Adaptive FNO) — used in FourCastNet for high-res weather
+
+**Tasks**
+
+- Each block of an FNO; stacked 4 times in the canonical architecture
+- PDE surrogate models trained on simulator data
+
+**Common pitfalls**
+
+- 1×1 conv path captures high-frequency residuals that the spectral path truncates — removing it kills accuracy.
+- Number of modes is a sensitive hyperparameter per axis.
+
+**See also**
+
+- [FNO (Li et al. 2020)](https://arxiv.org/abs/2010.08895)

@@ -29,3 +29,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Performer / FAVOR+ — orthogonal random feature kernel
+- Linformer, Linear Transformers (Katharopoulos et al.)
+- RWKV — RNN/transformer hybrid using linear-attention recurrence
+
+**Tasks**
+
+- Long-context modelling (audio, DNA, code) where T ≫ 10⁴
+- Streaming inference where state can be kept as a fixed-size matrix
+
+**Common pitfalls**
+
+- Quality lags softmax attention on language modelling — closes only with careful kernel choice and longer training.
+- Normalisation is numerically delicate — pick a kernel φ(·) that is strictly positive.
+- Causal masking is non-trivial — requires a per-token running sum, not a single matmul.
+
+**See also**
+
+- [Linear Transformers (Katharopoulos et al. 2020)](https://arxiv.org/abs/2006.16236)
+- [Performer (Choromanski et al. 2020)](https://arxiv.org/abs/2009.14794)
+- [RWKV (Peng et al. 2023)](https://arxiv.org/abs/2305.13048)

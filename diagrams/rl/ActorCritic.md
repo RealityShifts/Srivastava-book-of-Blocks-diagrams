@@ -28,3 +28,28 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- A2C / A3C — original sync / async actor-critic
+- PPO — clipped policy ratio + value loss on the same trunk
+- IMPALA — distributed actor-critic with V-trace corrections
+- MuZero — model + policy + value heads on a shared latent
+
+**Tasks**
+
+- Sample-efficient on-policy learning where critic reduces policy-gradient variance
+- Large-scale distributed RL where one trunk feeds many workers
+- RLHF — actor outputs token distributions, critic scores partial responses for advantage computation
+
+**Common pitfalls**
+
+- Policy and value losses compete for trunk capacity — clip the value loss or weight it (`c_v ≈ 0.5`).
+- Entropy bonus is essential for exploration in early training; anneal it as the policy sharpens.
+- Gradient norm explodes on bad batches — global-norm clip (typically 0.5–1.0).
+
+**See also**
+
+- [A3C (Mnih et al. 2016)](https://arxiv.org/abs/1602.01783)
+- [PPO (Schulman et al. 2017)](https://arxiv.org/abs/1707.06347)
+- [IMPALA (Espeholt et al. 2018)](https://arxiv.org/abs/1802.01561)

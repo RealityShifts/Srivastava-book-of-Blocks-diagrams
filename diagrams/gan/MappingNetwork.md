@@ -25,3 +25,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- StyleGAN v1 / v2 / v3 — the f: z → w map
+- StyleGAN-T text-to-image
+
+**Tasks**
+
+- Disentangling latent noise into a more linear style space W
+- Enabling style mixing and W+ inversion / editing
+
+**Common pitfalls**
+
+- Without the low LR multiplier (~0.01), the mapping net dominates training updates.
+- Skipping PixelNorm on z makes early training unstable.
+- Depth of 8 is empirical; smaller maps under-disentangle, deeper maps offer no gains.
+
+**See also**
+
+- [StyleGAN (Karras et al. 2019)](https://arxiv.org/abs/1812.04948)

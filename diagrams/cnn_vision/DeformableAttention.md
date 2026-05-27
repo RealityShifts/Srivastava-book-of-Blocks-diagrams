@@ -29,3 +29,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Deformable DETR — convergence in ~10× fewer epochs than DETR
+- DINO, DN-DETR, H-DETR — modern detection transformers
+- 3D detection (Deformable 3D-DETR)
+
+**Tasks**
+
+- Detection / segmentation with transformer backbones
+- Multi-scale feature aggregation in attention with sub-quadratic cost
+
+**Common pitfalls**
+
+- Each query samples K points per level — too small (K < 4) hurts recall, too large kills speed.
+- Reference-point initialisation matters; query anchors are typically tied to encoder positions.
+- Implementation needs custom CUDA op for full speed (ms-deformable-attention).
+
+**See also**
+
+- [Deformable DETR (Zhu et al. 2020)](https://arxiv.org/abs/2010.04159)
+- [DINO (Zhang et al. 2022)](https://arxiv.org/abs/2203.03605)

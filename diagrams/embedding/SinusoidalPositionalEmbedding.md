@@ -27,3 +27,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Original Transformer (Vaswani et al. 2017)
+- Diffusion timestep encoders (DDPM / DDIM noise predictor)
+- Music / audio Transformers
+
+**Tasks**
+
+- Position injection without learned parameters
+- Encoding any continuous scalar (timestep, frequency, depth)
+
+**Common pitfalls**
+
+- Encoding magnitudes match a specific D — copying the impl with the wrong base (10000) or missing the /2 in the exponent silently breaks things.
+- Extrapolation beyond training T degrades smoothly but not magically.
+- Even/odd dim split must match between sin and cos to be invertible.
+
+**See also**
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)

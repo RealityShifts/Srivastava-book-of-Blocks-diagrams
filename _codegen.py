@@ -167,7 +167,7 @@ def _uid_for(meta: Dict[str, Any], r: int, c: int) -> str:
 
 
 def _build_graph(spec: Tuple[Any, ...]) -> _G:
-    desc, shapes, rows, skips, edges_explicit = _spec_unpack(spec)
+    desc, shapes, rows, skips, edges_explicit, _ = _spec_unpack(spec)
     g = _G()
     g.desc = desc            # type: ignore[attr-defined]
     g.shapes = shapes        # type: ignore[attr-defined]

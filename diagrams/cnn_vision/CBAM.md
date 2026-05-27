@@ -31,3 +31,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- CBAM-augmented ResNet, MobileNet, WideResNet
+- Object detection / segmentation heads needing both channel and spatial focus
+
+**Tasks**
+
+- Lightweight plug-in attention that captures BOTH 'what' (channel) and 'where' (spatial)
+- Boosting accuracy on small-to-mid CNNs without changing depth/width
+
+**Common pitfalls**
+
+- Order matters — channel-first then spatial is what the paper proves; reversing is worse.
+- Spatial attention uses a single 7×7 conv on a 2-channel pool; replace with 3×3 only if input resolution is small.
+- Mostly subsumed by self-attention in modern hybrid CNN/transformer designs.
+
+**See also**
+
+- [CBAM (Woo et al. 2018)](https://arxiv.org/abs/1807.06521)
+- [BAM (Park et al. 2018)](https://arxiv.org/abs/1807.06514)

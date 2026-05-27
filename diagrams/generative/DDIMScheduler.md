@@ -27,3 +27,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DDIM sampler (Stable Diffusion default before DPM-Solver)
+- Image editing methods (SDEdit, prompt-to-prompt) that rely on deterministic noise
+
+**Tasks**
+
+- Fast deterministic sampling with fewer steps (50 → ~20 typical)
+- Reproducible editing through inversion-then-resample
+
+**Common pitfalls**
+
+- Quality at very low step counts (<10) lags behind DPM-Solver++ / Heun-2.
+- Stochasticity parameter η controls determinism — η = 0 is fully deterministic, η = 1 recovers DDPM.
+- Inversion via DDIM is approximate; long edits accumulate drift.
+
+**See also**
+
+- [DDIM (Song et al. 2020)](https://arxiv.org/abs/2010.02502)
+- [DPM-Solver (Lu et al. 2022)](https://arxiv.org/abs/2206.00927)

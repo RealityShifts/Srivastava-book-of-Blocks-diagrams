@@ -53,3 +53,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- BERT and other encoder-only transformer towers
+- ViT / DeiT / DINO image transformers
+- Speech encoders (Whisper, wav2vec 2.0)
+
+**Tasks**
+
+- Bidirectional context mixing — every token attends to every other token
+- Backbone for non-autoregressive tasks (classification, segmentation, span extraction)
+
+**Common pitfalls**
+
+- Identical Q = K = V projection weights are NOT used — three separate W_q, W_k, W_v are.
+- Without positional encoding the operation is fully permutation-equivariant, which is almost never what you want.
+
+**See also**
+
+- [BERT (Devlin et al. 2018)](https://arxiv.org/abs/1810.04805)
+- [ViT (Dosovitskiy et al. 2020)](https://arxiv.org/abs/2010.11929)

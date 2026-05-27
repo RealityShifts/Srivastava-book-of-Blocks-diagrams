@@ -23,3 +23,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Every LLM input layer (BERT, GPT, T5, LLaMA)
+- Word2Vec, GloVe — classical static embeddings
+- Code / protein / DNA models with custom tokenizers
+
+**Tasks**
+
+- Mapping discrete tokens to continuous vectors for downstream layers
+- Output classification (when tied to the input weight matrix)
+
+**Common pitfalls**
+
+- Vocabulary mismatch — embedding rows must align with the tokenizer that produced ids.
+- Forgetting to scale by √D in original Transformer breaks position-encoding magnitude.
+- Tied input/output embeddings save parameters but require careful gradient scaling.
+- OOV token handling (UNK / fallback bytes) must be explicit; silent fallbacks bias evals.
+
+**See also**
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)
+- [Tied Embeddings (Press & Wolf 2016)](https://arxiv.org/abs/1608.05859)

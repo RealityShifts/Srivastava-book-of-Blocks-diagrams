@@ -27,3 +27,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Google's internal ViT-22B, JFT-classification training (Chen et al. 2023)
+- Open replications on ViT, diffusion, LLM pretraining
+- Production CTR models at Google
+
+**Tasks**
+
+- Memory-efficient training — keeps only momentum, not Adam's second moment (≈ 1/3 less state)
+- Large-batch pretraining where Adam's update magnitude is unstable
+
+**Common pitfalls**
+
+- Learning rate must be ~3–10× SMALLER than Adam's because sign(·) has unit per-coord magnitude.
+- Sensitive to weight decay — decoupled WD (AdamW-style) is essential.
+- Gains shrink at small batch sizes; original paper reports best at large-batch regimes.
+
+**See also**
+
+- [Lion / Symbolic Discovery (Chen et al. 2023)](https://arxiv.org/abs/2302.06675)
+- [Lion implementation](https://github.com/google/automl/tree/master/lion)

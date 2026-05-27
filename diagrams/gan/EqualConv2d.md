@@ -25,3 +25,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- StyleGAN generator and discriminator convolution layers
+- PGGAN progressively-grown image stages
+
+**Tasks**
+
+- Stable training of CNN generators at high resolution
+- Drop-in replacement for Conv2d in generative architectures
+
+**Common pitfalls**
+
+- Scale factor is per-layer based on fan-in — wrong fan-in computation silently mis-scales.
+- Bias initialisation should be zero — non-zero bias defeats the equalised LR effect.
+
+**See also**
+
+- [PGGAN (Karras et al. 2017)](https://arxiv.org/abs/1710.10196)
+- [StyleGAN2 (Karras et al. 2020)](https://arxiv.org/abs/1912.04958)

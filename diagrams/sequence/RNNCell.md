@@ -31,3 +31,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Early language models and sequence taggers (pre-LSTM era)
+- Hopfield-style associative memories (modernised in Ramsauer et al. 2020)
+- Toy / teaching examples illustrating vanishing-gradient
+
+**Tasks**
+
+- Sequence modelling when sequences are very short and overhead matters
+- Foundational analysis of recurrence and dynamical systems
+
+**Common pitfalls**
+
+- Vanishing / exploding gradients with sequences > ~20 steps — almost never used in modern code.
+- Stacking deep RNNs without orthogonal init or gradient clipping is unstable.
+- Replaced in nearly all practical use by LSTM, GRU, Transformer, or SSMs.
+
+**See also**
+
+- [Elman RNN (Elman 1990)](https://onlinelibrary.wiley.com/doi/10.1207/s15516709cog1402_1)
+- [On the difficulty of training RNNs (Pascanu et al. 2013)](https://arxiv.org/abs/1211.5063)

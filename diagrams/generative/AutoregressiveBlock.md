@@ -27,3 +27,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- PixelCNN family for image density modelling
+- WaveNet (1D analogue) for raw audio waveform modelling
+
+**Tasks**
+
+- Exact-likelihood density modelling
+- Sample diversity at the cost of slow inference
+
+**Common pitfalls**
+
+- Output K = #bins of pixel intensity (256 for 8-bit) — softmax memory grows fast.
+- Mostly superseded by VQ + transformer or diffusion for image generation quality.
+- Conditional variants need careful broadcasting of the conditioning signal under the mask.
+
+**See also**
+
+- [PixelCNN++ (Salimans et al. 2017)](https://arxiv.org/abs/1701.05517)
+- [WaveNet (van den Oord et al. 2016)](https://arxiv.org/abs/1609.03499)

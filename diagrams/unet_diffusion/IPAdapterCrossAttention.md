@@ -28,3 +28,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- IP-Adapter — image-prompt conditioning for Stable Diffusion
+- IP-Adapter-FaceID, IP-Adapter-Plus variants
+
+**Tasks**
+
+- Conditioning a text-to-image diffusion model on a REFERENCE IMAGE prompt
+- Image-prompted personalisation without per-subject fine-tuning
+
+**Common pitfalls**
+
+- Image and text branches use SEPARATE projections — sharing weights collapses modality.
+- Image-branch scale (λ) is critical; high values overpower the text prompt.
+- Reference encoder choice (CLIP ViT-L vs OpenCLIP H) changes downstream behaviour.
+
+**See also**
+
+- [IP-Adapter (Ye et al. 2023)](https://arxiv.org/abs/2308.06721)

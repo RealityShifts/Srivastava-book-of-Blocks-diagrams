@@ -29,3 +29,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Arbitrary neural style transfer (Huang & Belongie 2017)
+- StyleGAN v1 — every conv layer is AdaIN-modulated by a style code w
+- Voice-conversion and image-to-image translation
+
+**Tasks**
+
+- Inject a per-sample style code into a content stream
+- Single-network arbitrary style transfer (no per-style fine-tuning)
+
+**Common pitfalls**
+
+- Removes spatial mean/std — fine for style but throws away content statistics; StyleGAN2 replaced it with weight-space modulation (ModulatedConv2d) for this reason.
+- Style collapse if (γ, β) come from a low-rank MLP — keep the conditioning head wide.
+
+**See also**
+
+- [AdaIN (Huang & Belongie 2017)](https://arxiv.org/abs/1703.06868)
+- [StyleGAN (Karras et al. 2019)](https://arxiv.org/abs/1812.04948)
+- [StyleGAN2 critique of AdaIN (Karras et al. 2020)](https://arxiv.org/abs/1912.04958)

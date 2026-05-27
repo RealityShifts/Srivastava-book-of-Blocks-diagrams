@@ -27,3 +27,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- T5 v1.1 and FLAN-T5
+- Gemini-1 reported variants
+- Stable Diffusion's text encoder branch
+
+**Tasks**
+
+- Drop-in FFN replacement when GELU is preferred over SiLU (e.g. matching legacy initialisations)
+
+**Common pitfalls**
+
+- Same three-projection accounting trap as SwiGLU — adjust inner dim to keep params constant.
+- Marginal difference vs SwiGLU in practice — choose based on tokenizer / init compatibility.
+
+**See also**
+
+- [GLU Variants (Shazeer 2020)](https://arxiv.org/abs/2002.05202)
+- [T5 v1.1 release notes](https://github.com/google-research/text-to-text-transfer-transformer/blob/main/released_checkpoints.md#t511)

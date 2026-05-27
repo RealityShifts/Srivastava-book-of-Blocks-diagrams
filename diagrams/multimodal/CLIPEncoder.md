@@ -36,3 +36,28 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- CLIP / OpenCLIP / SigLIP — image-text contrastive pretraining
+- Stable Diffusion's text encoder (frozen CLIP ViT-L)
+- DALL·E 2, ImageBind, BLIP-2 vision branch
+
+**Tasks**
+
+- Zero-shot image classification, retrieval, captioning
+- Text-conditioned generation (the text tower's outputs condition diffusion / generative LMs)
+- Cross-modal alignment as a foundation for downstream multimodal tasks
+
+**Common pitfalls**
+
+- Image and text towers have DIFFERENT pretraining recipes — naïve swapping breaks alignment.
+- Tokenizer mismatch between training and inference is the #1 silent failure.
+- Bias in pre-training data (e.g. ImageNet-style centred subjects) leaks into downstream tasks.
+- CLIP loss requires huge batch (32k+) for top quality; SigLIP relaxes this.
+
+**See also**
+
+- [CLIP (Radford et al. 2021)](https://arxiv.org/abs/2103.00020)
+- [OpenCLIP](https://github.com/mlfoundations/open_clip)
+- [SigLIP (Zhai et al. 2023)](https://arxiv.org/abs/2303.15343)

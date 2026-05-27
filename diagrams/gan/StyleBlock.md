@@ -33,3 +33,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- StyleGAN v1 generator (every resolution stage)
+- Style-based generators for portraits, faces, cars
+
+**Tasks**
+
+- Spatially-uniform style injection at each resolution
+- Stochastic detail through per-pixel noise
+
+**Common pitfalls**
+
+- AdaIN-induced droplet artefacts (StyleGAN v1) — fixed in StyleGAN2's modulated conv.
+- Noise scale per channel matters — fix or learn carefully; too large dominates the output.
+- Style mixing regularisation (random truncation across resolutions) is essential for quality.
+
+**See also**
+
+- [StyleGAN (Karras et al. 2019)](https://arxiv.org/abs/1812.04948)

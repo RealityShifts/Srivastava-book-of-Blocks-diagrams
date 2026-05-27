@@ -30,3 +30,22 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- PGGAN and StyleGAN discriminator's last block
+
+**Tasks**
+
+- Discriminator-side diversity signal — penalises mode collapse
+- Cheap addition that helps GANs avoid producing nearly identical samples
+
+**Common pitfalls**
+
+- Needs a meaningful batch size — std over batch ≤ 2 is noise.
+- Multi-GPU training: std must be computed PER local batch or all-reduced for consistency.
+- Placement matters — at the deepest discriminator layer, not the input.
+
+**See also**
+
+- [PGGAN (Karras et al. 2017)](https://arxiv.org/abs/1710.10196)

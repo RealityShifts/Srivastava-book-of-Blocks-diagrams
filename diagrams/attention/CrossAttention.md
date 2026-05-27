@@ -59,3 +59,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Encoder-decoder Transformers (machine translation, T5, BART)
+- Diffusion U-Nets: image latents attend to text embeddings (Stable Diffusion)
+- Perceiver / Q-Former / Flamingo — latents attend to media features
+
+**Tasks**
+
+- Conditional generation (text-to-image, translation, captioning)
+- Fusing two different modalities or sequence lengths
+
+**Common pitfalls**
+
+- K and V must come from the SAME source (the context). A common bug is letting them diverge accidentally during refactors.
+- Q-length and K-length differ — never confuse `(B, T_q, D)` and `(B, T_k, D)` in masks.
+- Memory grows as T_q × T_k, not T².
+
+**See also**
+
+- [Attention Is All You Need (Vaswani et al. 2017)](https://arxiv.org/abs/1706.03762)
+- [Stable Diffusion (Rombach et al. 2021)](https://arxiv.org/abs/2112.10752)

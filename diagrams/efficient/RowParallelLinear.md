@@ -25,3 +25,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Megatron-LM TP (the partner of ColumnParallelLinear)
+- Inference engines (TensorRT-LLM, vLLM) with TP > 1
+
+**Tasks**
+
+- Completing the column-then-row sharding pattern within a single Transformer sublayer
+- Reducing per-GPU memory and compute for very wide hidden states
+
+**Common pitfalls**
+
+- All-reduce is bandwidth-bound — NVLink between GPUs is far better than PCIe.
+- Don't all-reduce inside fp16 / fp8 — cast to fp32 for the reduction or use higher-precision all-reduce APIs.
+- Backward also needs an all-reduce; total comm cost is 2× the forward.
+
+**See also**
+
+- [Megatron-LM (Shoeybi et al. 2019)](https://arxiv.org/abs/1909.08053)

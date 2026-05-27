@@ -25,3 +25,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Deep Compression (Han et al. 2015) — pioneering work
+- Lottery-Ticket Hypothesis fine-tunes after magnitude pruning
+- NVIDIA 2:4 structured-sparsity recipes (A100 sparse tensor cores)
+
+**Tasks**
+
+- Model compression for embedded / mobile deployment
+- Studying generalisation via sparse subnetworks
+
+**Common pitfalls**
+
+- Unstructured sparsity is hard to accelerate on standard hardware — go 2:4 / N:M sparse for real wall-clock gains.
+- One-shot pruning beyond ~80 % sparsity collapses accuracy — use iterative magnitude pruning.
+- Threshold τ per-layer matters; global magnitude pruning often outperforms per-layer.
+- Fine-tuning after pruning is essential to recover accuracy.
+
+**See also**
+
+- [Deep Compression (Han et al. 2015)](https://arxiv.org/abs/1510.00149)
+- [Lottery Ticket (Frankle & Carbin 2018)](https://arxiv.org/abs/1803.03635)
+- [N:M Structured Sparsity (Mishra et al. 2021)](https://arxiv.org/abs/2104.08378)

@@ -25,3 +25,27 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- FAISS, ScaNN, Annoy — open-source ANN libraries
+- Pinecone, Weaviate, Qdrant, Milvus — managed vector DBs
+- OpenAI / Cohere / Voyage embedding APIs
+
+**Tasks**
+
+- Semantic search, question answering, recommendation
+- Retrieval branch of RAG / kNN-LM / Memorising Transformers
+
+**Common pitfalls**
+
+- Index parameters (HNSW M, efConstruction; IVF nlist; PQ nbits) need tuning per data scale — defaults rarely optimal.
+- Embedding distribution drift between query and document encoders causes recall collapse.
+- Cosine vs dot vs L2 — be explicit; mismatches between training loss and search metric silently degrade results.
+- Re-indexing on embedding-model upgrade is expensive — version your indices.
+
+**See also**
+
+- [FAISS (Johnson et al. 2017)](https://arxiv.org/abs/1702.08734)
+- [HNSW (Malkov & Yashunin 2016)](https://arxiv.org/abs/1603.09320)
+- [ScaNN (Guo et al. 2020)](https://arxiv.org/abs/1908.10396)

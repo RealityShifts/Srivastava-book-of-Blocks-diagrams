@@ -23,3 +23,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DeepLab v1/v2/v3 semantic segmentation
+- WaveNet — stacks of dilated 1-D convs for raw audio
+- Dilated TCNs for long-range time-series
+
+**Tasks**
+
+- Dense prediction (segmentation, depth) where spatial resolution must be preserved
+- Long-range temporal modelling without growing parameters
+
+**Common pitfalls**
+
+- Naïve stacks of equal dilations cause gridding artefacts — vary dilations (1, 2, 4, ...) or use HDC schedules.
+- Receptive field grows but resolution doesn't — pair with multi-scale fusion (ASPP) for best results.
+
+**See also**
+
+- [Multi-Scale Context (Yu & Koltun 2015)](https://arxiv.org/abs/1511.07122)
+- [DeepLab v3 (Chen et al. 2017)](https://arxiv.org/abs/1706.05587)
+- [WaveNet (van den Oord et al. 2016)](https://arxiv.org/abs/1609.03499)

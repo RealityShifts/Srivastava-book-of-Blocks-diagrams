@@ -31,3 +31,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DenseNet-121/169/201/264 — ImageNet backbone
+- Tiramisu (DenseNet-based semantic segmentation)
+- Dense U-Net variants for medical imaging
+
+**Tasks**
+
+- Backbones that need strong feature reuse with relatively few parameters
+- Tasks with limited data (medical) — implicit deep supervision via skip-everywhere
+
+**Common pitfalls**
+
+- Memory-hungry at training: all activations are kept for concatenation — use shared-memory / checkpointed implementations.
+- Channel count grows linearly with layers (`C + k·L`); the transition layer 1×1 conv compresses this back down — never skip it.
+- Slower than ResNet of the same accuracy on GPUs (memory-bound).
+
+**See also**
+
+- [DenseNet (Huang et al. 2016)](https://arxiv.org/abs/1608.06993)
+- [Memory-Efficient DenseNet (Pleiss et al. 2017)](https://arxiv.org/abs/1707.06990)

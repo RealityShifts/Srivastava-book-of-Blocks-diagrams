@@ -27,3 +27,21 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- Stable Diffusion U-Net's time conditioning head
+- ControlNet / IP-Adapter side branches
+
+**Tasks**
+
+- Mapping raw sinusoidal time encodings to a richer feature space matched to each ResBlock
+
+**Common pitfalls**
+
+- Output dim D' should match the ResBlock channel — otherwise broadcasting is wrong.
+- Don't fold this into a single layer — the non-linearity is what gives time embeddings their expressive power.
+
+**See also**
+
+- [DDPM (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)

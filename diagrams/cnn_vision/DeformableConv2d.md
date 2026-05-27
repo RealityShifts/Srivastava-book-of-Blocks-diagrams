@@ -27,3 +27,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DCNv1 / DCNv2 — object detection (Faster R-CNN with DCN)
+- Pose estimation, instance segmentation backbones
+- Optical flow networks where spatial sampling is irregular
+
+**Tasks**
+
+- Tasks needing geometric flexibility (non-rigid objects, varying scales)
+- Bridging convolution and attention: sparse, content-aware sampling
+
+**Common pitfalls**
+
+- Offsets can drift to absurd locations — clamp or add a regularising loss (DCNv2's modulation).
+- Pure-PyTorch fallback is slow; production code uses CUDA kernel from torchvision.ops.
+- Doubles parameters of the layer (offset branch); accuracy gain is biggest in detection.
+
+**See also**
+
+- [Deformable Convolution (Dai et al. 2017)](https://arxiv.org/abs/1703.06211)
+- [DCNv2 (Zhu et al. 2018)](https://arxiv.org/abs/1811.11168)

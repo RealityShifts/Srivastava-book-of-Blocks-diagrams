@@ -63,3 +63,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DDPM, DDIM, EDM samplers
+- Stable Diffusion's denoising backbone
+
+**Tasks**
+
+- Predicting noise added at step t given the noisy latent / pixel
+- Equivalently used in v-prediction or x0-prediction parametrisations
+
+**Common pitfalls**
+
+- Training objective parametrisation (ε / v / x0) changes the loss weighting — match training and sampling exactly.
+- Classifier-free guidance requires conditional + unconditional passes at sample time — double the forward cost.
+- EMA of weights is usually used for sampling rather than the raw training weights.
+
+**See also**
+
+- [DDPM (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)
+- [v-prediction (Salimans & Ho 2022)](https://arxiv.org/abs/2202.00512)
+- [EDM (Karras et al. 2022)](https://arxiv.org/abs/2206.00364)

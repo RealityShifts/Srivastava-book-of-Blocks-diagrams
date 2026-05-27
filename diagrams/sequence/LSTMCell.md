@@ -31,3 +31,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- seq2seq neural machine translation (pre-Transformer)
+- Speech recognition (DeepSpeech, Listen-Attend-Spell)
+- Time-series forecasting, on-device keyword spotting
+- AlphaStar (StarCraft II) policy core
+
+**Tasks**
+
+- Sequence modelling when memory is constant in time (streaming inference)
+- Settings where compute / latency budget excludes attention
+
+**Common pitfalls**
+
+- Forget-gate bias should be initialised to 1 (Jozefowicz et al. 2015) — most defaults init to 0.
+- Per-step latency limits throughput on GPUs; batched-time matmul helps but not by much.
+- Vanishing gradients are TAMED, not removed — bidirectional or attention helps for very long T.
+
+**See also**
+
+- [LSTM (Hochreiter & Schmidhuber 1997)](https://www.bioinf.jku.at/publications/older/2604.pdf)
+- [Empirical Eval of Gated RNNs (Jozefowicz et al. 2015)](https://proceedings.mlr.press/v37/jozefowicz15.html)

@@ -1,7 +1,7 @@
 """DSL helpers and types shared by the renderer and every block file.
 
 Block authors should ``from dsl import _io, _op, _ref, ...`` and return
-``Spec`` tuples shaped ``(desc, shapes, rows[, skips[, edges]])``.
+``Spec`` tuples shaped ``(desc, shapes, rows[, skips[, edges[, notes]]])``.
 
 Every node helper accepts the same set of optional keyword arguments:
 
@@ -21,6 +21,18 @@ The optional 5th spec element ``edges`` is a list of ``(src_id, dst_id)`` or
 draws only the explicit edges (plus skip edges). When two shape-annotated
 nodes are connected and their shapes disagree, the edge is rendered as a red
 error arrow and a warning is printed.
+
+The optional 6th spec element ``notes`` is a dict of long-form context that
+the renderer turns into extra markdown sections under each diagram. Use
+:func:`_notes` for an ergonomic constructor. Supported keys (all optional):
+
+* ``used_in``   -- famous architectures / systems where the block appears.
+* ``tasks``     -- problem domains / what you'd reach for this block to solve.
+* ``pitfalls``  -- common gotchas, instabilities, or things to verify.
+* ``see_also``  -- papers / refs / related blocks (markdown links allowed).
+
+Any other key passed to :func:`_notes` is preserved verbatim and rendered as
+its own section. Pass ``None`` or an empty dict to skip the block entirely.
 """
 
 from __future__ import annotations
@@ -34,6 +46,7 @@ Node = Union[Tuple[str, str], Tuple[str, str, Meta]]
 Row = List[Node]
 Skip = Tuple[int, int, int, int]
 Edge = Union[Tuple[str, str], Tuple[str, str, str]]
+Notes = Dict[str, List[str]]
 Spec = Tuple
 
 
@@ -112,8 +125,41 @@ def _edge(src: str, dst: str, label: Optional[str] = None) -> Edge:
     return (src, dst, label) if label is not None else (src, dst)
 
 
+def _notes(
+    *,
+    used_in: Optional[List[str]] = None,
+    tasks: Optional[List[str]] = None,
+    pitfalls: Optional[List[str]] = None,
+    see_also: Optional[List[str]] = None,
+    **extras: List[str],
+) -> Notes:
+    """Build the spec's optional 6th-element ``notes`` dict.
+
+    Each kwarg is a list of strings; entries may contain markdown (including
+    links like ``[Title](url)``). Only non-empty keys end up in the output,
+    so passing nothing yields an empty dict.
+
+    The four named slots render in a fixed order under the diagram; ``extras``
+    keep their declaration order and render after them with title-cased
+    headings (e.g. ``related_blocks=[...]`` → "Related blocks").
+    """
+    out: Notes = {}
+    if used_in:
+        out["used_in"] = list(used_in)
+    if tasks:
+        out["tasks"] = list(tasks)
+    if pitfalls:
+        out["pitfalls"] = list(pitfalls)
+    if see_also:
+        out["see_also"] = list(see_also)
+    for k, v in extras.items():
+        if v:
+            out[k] = list(v)
+    return out
+
+
 __all__ = [
-    "KINDS", "Meta", "Node", "Row", "Skip", "Edge", "Spec",
+    "KINDS", "Meta", "Node", "Row", "Skip", "Edge", "Notes", "Spec",
     "_io", "_op", "_norm", "_act", "_attn",
-    "_merge", "_emb", "_loss", "_ref", "_edge",
+    "_merge", "_emb", "_loss", "_ref", "_edge", "_notes",
 ]

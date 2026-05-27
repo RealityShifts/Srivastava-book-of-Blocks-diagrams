@@ -27,3 +27,23 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DCGAN / WGAN / StyleGAN discriminators
+- PatchGAN discriminator in Pix2Pix / CycleGAN
+
+**Tasks**
+
+- Downsampling and feature extraction in the critic / discriminator
+
+**Common pitfalls**
+
+- Spectral Normalisation (SN-GAN) is often used instead of InstanceNorm for Lipschitz control.
+- Stride-2 conv can lose information — combine with anti-aliased pooling (StyleGAN3).
+- LeakyReLU slope 0.2 is convention; smaller slopes saturate gradients in the negative tail.
+
+**See also**
+
+- [Spectral Norm (Miyato et al. 2018)](https://arxiv.org/abs/1802.05957)
+- [PatchGAN / Pix2Pix (Isola et al. 2016)](https://arxiv.org/abs/1611.07004)

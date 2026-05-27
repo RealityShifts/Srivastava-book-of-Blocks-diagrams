@@ -29,3 +29,22 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- GauGAN / SPADE — semantic image synthesis from segmentation masks
+- Image editing pipelines that need spatial conditioning
+
+**Tasks**
+
+- Image generation conditioned on layout / semantic mask
+- Sketch-to-image, label-to-image translation
+
+**Common pitfalls**
+
+- γ and β are spatially dense — needs care to broadcast over batch but not space.
+- Standard BatchNorm step washes away the conditioning if applied AFTER the modulation; BN goes first, modulation second.
+
+**See also**
+
+- [SPADE / GauGAN (Park et al. 2019)](https://arxiv.org/abs/1903.07291)

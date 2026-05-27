@@ -29,3 +29,28 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- PyTorch Geometric's `MessagePassing` base class
+- DeepMind GraphNets (Battaglia et al. 2018) — the unifying formulation
+- Almost every GNN variant — GCN, GAT, GraphSAGE, GIN, MPNN, EGNN
+
+**Tasks**
+
+- Molecular property prediction (QM9, ZINC)
+- Recommendation (PinSAGE, GraphSAGE on social graphs)
+- Combinatorial optimisation, knowledge-graph reasoning
+
+**Common pitfalls**
+
+- Over-smoothing at depth — after ~3 hops nodes converge to similar vectors. Mitigate with PairNorm, skip connections, or DropEdge.
+- Over-squashing — long-range info bottlenecks through bridge edges; rewiring helps.
+- Aggregation choice (sum / mean / max) changes expressiveness — sum is strictly more expressive (GIN paper).
+- Mini-batching irregular graphs is non-trivial — use neighbor sampling or cluster-GCN.
+
+**See also**
+
+- [Relational Inductive Biases (Battaglia et al. 2018)](https://arxiv.org/abs/1806.01261)
+- [MPNN (Gilmer et al. 2017)](https://arxiv.org/abs/1704.01212)
+- [GIN / How Powerful Are GNNs (Xu et al. 2018)](https://arxiv.org/abs/1810.00826)

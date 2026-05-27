@@ -23,3 +23,21 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- U-Net encoders in DDPM, Stable Diffusion, video diffusion
+- CNN backbones generally
+
+**Tasks**
+
+- Cutting spatial resolution while keeping (or growing) channel count
+
+**Common pitfalls**
+
+- Stride-2 conv aliases — for low-frequency-preserving downsample, use blur-then-stride (StyleGAN3 anti-aliasing) or avg-pool.
+- Padding choice affects boundary statistics — keep consistent with the upsample path.
+
+**See also**
+
+- [Anti-Aliased CNNs (Zhang 2019)](https://arxiv.org/abs/1904.11486)

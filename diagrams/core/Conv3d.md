@@ -23,3 +23,25 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- C3D, I3D, SlowFast — video classification
+- V-Net / 3D U-Net — volumetric medical segmentation
+- Spatio-temporal anomaly detection
+
+**Tasks**
+
+- Video action recognition / temporal segmentation
+- MRI / CT volumetric analysis where slices share structure
+
+**Common pitfalls**
+
+- Memory explodes — a single conv with K=3 over (T=16, H=224, W=224) needs careful batching.
+- Pretrained 2D weights inflate poorly into 3D — use I3D-style inflation or (2+1)D factorisation for transfer.
+
+**See also**
+
+- [C3D (Tran et al. 2014)](https://arxiv.org/abs/1412.0767)
+- [I3D (Carreira & Zisserman 2017)](https://arxiv.org/abs/1705.07750)
+- [V-Net (Milletari et al. 2016)](https://arxiv.org/abs/1606.04797)

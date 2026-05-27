@@ -38,3 +38,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DDPM noise predictor
+- Stable Diffusion U-Net (every resolution level)
+- Latent video diffusion (SVD, AnimateDiff)
+
+**Tasks**
+
+- Time-conditioned feature extraction in a diffusion backbone
+
+**Common pitfalls**
+
+- Time embedding is added BETWEEN the two convs (not at the input) — placement matters.
+- GroupNorm groups must divide channel count; 32 is standard, mismatches silently break.
+- Skip connection must match channel count — add a 1×1 projection when C' ≠ C.
+
+**See also**
+
+- [DDPM (Ho et al. 2020)](https://arxiv.org/abs/2006.11239)
+- [GroupNorm (Wu & He 2018)](https://arxiv.org/abs/1803.08494)

@@ -23,3 +23,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- PixelCNN / Gated PixelCNN / PixelCNN++ — autoregressive image models
+- Image GPT (van den Oord -> Chen 2020) for unsupervised representation pre-training
+
+**Tasks**
+
+- Density modelling of images / discrete grids
+- Lossless image compression baselines
+
+**Common pitfalls**
+
+- Blind-spot bug: a naïve mask over a vertical stack creates a region the centre pixel never sees — fixed by Gated PixelCNN's vertical + horizontal stack design.
+- Type-A (input layer) vs Type-B (subsequent layers) masks differ — confusing them leaks information through residual connections.
+- Inherently sequential at sampling — O(H·W) forward passes per image.
+
+**See also**
+
+- [PixelCNN (van den Oord et al. 2016)](https://arxiv.org/abs/1606.05328)
+- [PixelRNN / PixelCNN (van den Oord et al. 2016)](https://arxiv.org/abs/1601.06759)

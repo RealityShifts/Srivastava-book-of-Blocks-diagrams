@@ -25,3 +25,34 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- DQN — discrete actions, one head per action
+- Double DQN — decoupled action-selection vs target-evaluation
+- Dueling DQN — V(s) + advantage stream
+- DDPG / TD3 — Q(s, a) with concatenated state-action input
+- SAC — twin Q-networks to mitigate maximisation bias
+- Rainbow — combines DQN, Double, Dueling, PER, n-step, NoisyNets, C51
+
+**Tasks**
+
+- Off-policy value-based learning on Atari / discrete benchmarks
+- Continuous control via deterministic policy gradient (DDPG/TD3/SAC)
+- Hybrid imitation + RL (Q-filter for behaviour cloning)
+
+**Common pitfalls**
+
+- Maximisation bias from `max_a Q(s, a)` — use Double DQN or twin Q-networks (TD3, SAC) to decorrelate target selection.
+- Replay-buffer correlation breaks i.i.d. assumption — randomise minibatches and stagger updates.
+- Bootstrapping with the online net diverges easily — always pair with a TargetNetwork.
+- Concatenated-action MLPs scale poorly for high-dim discrete spaces — use per-action heads or factored representations.
+
+**See also**
+
+- [DQN (Mnih et al. 2015, Nature)](https://www.nature.com/articles/nature14236)
+- [Double DQN (van Hasselt et al. 2016)](https://arxiv.org/abs/1509.06461)
+- [Dueling DQN (Wang et al. 2016)](https://arxiv.org/abs/1511.06581)
+- [DDPG (Lillicrap et al. 2016)](https://arxiv.org/abs/1509.02971)
+- [TD3 (Fujimoto et al. 2018)](https://arxiv.org/abs/1802.09477)
+- [Rainbow (Hessel et al. 2018)](https://arxiv.org/abs/1710.02298)

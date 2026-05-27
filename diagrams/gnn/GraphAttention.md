@@ -31,3 +31,26 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- GAT, GATv2 — node classification, relation prediction
+- Mesh / point-cloud learning (Point Transformer)
+- Heterogeneous graph attention (HAN, HGT)
+
+**Tasks**
+
+- Tasks needing differential edge importance
+- Heterogeneous graphs where edge types carry semantics
+
+**Common pitfalls**
+
+- Original GAT (v1) has a static attention pattern that GATv2 fixes — use GATv2.
+- Softmax over neighbours requires segment-softmax (scatter softmax); naïve dense impl OOMs.
+- Attention quality degrades when nodes have very high degree — sample or sparsify.
+- Multi-head attention helps but multiplies compute; concatenation vs averaging changes downstream dim.
+
+**See also**
+
+- [GAT (Veličković et al. 2017)](https://arxiv.org/abs/1710.10903)
+- [GATv2 (Brody et al. 2021)](https://arxiv.org/abs/2105.14491)

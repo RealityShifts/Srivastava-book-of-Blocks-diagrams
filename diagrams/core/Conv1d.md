@@ -23,3 +23,24 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- WaveNet, Tacotron, Jukebox — raw audio / speech
+- Text-CNN (Kim 2014) — n-gram feature detectors over token embeddings
+- Mamba / S4 input projections
+
+**Tasks**
+
+- Sequence modelling where temporal locality dominates (audio, EEG, sensor)
+- Token-level n-gram features prior to pooling
+
+**Common pitfalls**
+
+- Channel-first vs channel-last layout differs between PyTorch and JAX — transpose at the boundary, not inside.
+- Causal padding for autoregressive streams must be left-only.
+
+**See also**
+
+- [Text-CNN (Kim 2014)](https://arxiv.org/abs/1408.5882)
+- [WaveNet (van den Oord et al. 2016)](https://arxiv.org/abs/1609.03499)

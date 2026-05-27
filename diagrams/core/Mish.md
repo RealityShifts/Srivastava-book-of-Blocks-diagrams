@@ -28,3 +28,22 @@ flowchart TD
     classDef ctrl fill:#f5f5f4,stroke:#52525b,stroke-width:1.4px,color:#27272a
     classDef ref fill:#e0f2fe,stroke:#0369a1,stroke-width:2px,color:#0c4a6e,stroke-dasharray: 4 2
 ```
+
+**Used in**
+
+- YOLOv4 and successors — replaced LeakyReLU in the backbone
+- CSPNet variants for image classification / detection
+
+**Tasks**
+
+- Drop-in replacement for ReLU/Swish in CNNs aiming for slight accuracy gains
+
+**Common pitfalls**
+
+- More expensive than ReLU/SiLU — measure wall-clock impact, not just FLOPs.
+- Smooth-but-nonmonotonic; gradients in the negative tail are small but not zero, which helps deep nets but is not always better than SiLU/GELU.
+
+**See also**
+
+- [Mish (Misra 2019)](https://arxiv.org/abs/1908.08681)
+- [YOLOv4 (Bochkovskiy et al. 2020)](https://arxiv.org/abs/2004.10934)
